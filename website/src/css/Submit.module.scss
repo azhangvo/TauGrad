@@ -1,0 +1,257 @@
+@import "Vars";
+
+.container {
+  width: 100vw;
+  @include for-tablet-portrait-up {
+    height: calc(100vh - 3 * #{$navHeight});
+  }
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  .subContainer {
+    max-width: 50%;
+    p {
+      text-align: justify;
+    }
+    .fileSub {
+      & > div {
+        margin-bottom: 24px;
+      }
+      button {
+        margin: 0;
+        border: none;
+        color: white;
+        background-color: $dark;
+        padding: 8px 20px;
+        cursor: pointer;
+        &:hover {
+          filter: brightness(1.6);
+        }
+      }
+      & > span {
+        padding: 10px;
+      }
+      .options {
+        border: 1px solid $dark;
+        border-radius: 4px;
+        svg {
+          color: $dark;
+        }
+        div {
+          color: $dark;
+        }
+        span {
+          background-color: $dark;
+        }
+      }
+    }
+    .subButtonContainer {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      button {
+        font-size: 24px;
+        margin: 0;
+        border: none;
+        color: white;
+        background-color: $dark;
+        padding: 12px 40px;
+        cursor: pointer;
+        &:hover {
+          filter: brightness(1.6);
+        }
+      }
+    }
+  }
+}
+
+.entryContainer {
+  height: calc(100% - 80vh);
+  width: 100%;
+  .entryModeContainer {
+    position: relative;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+    height: 60px;
+    .entrySpacer {
+      height: 36px;
+      .entry {
+        position: relative;
+        transform: translate(-50%, -50%);
+        left: 50%;
+        top: 50%;
+        padding: 5px 10px;
+        border-radius: 20px;
+        height: 20px;
+        width: 120px;
+        margin: 0;
+        border: 3px inset #ebe9ed;
+        background-color: #f4f4f4;
+        &.green {
+          border-color: rgb(8, 177, 25);
+          color: rgb(4, 150, 19);
+        }
+        &.yellow {
+          border-color: rgb(220, 254, 57);
+          color: rgb(143, 164, 37);
+        }
+        &.red {
+          border-color: rgb(244, 51, 51);
+          color: rgb(205, 42, 42);
+        }
+        transition: border-color 0.5s ease, box-shadow 0.5s ease,
+          color 0.5s ease;
+      }
+    }
+    .swapButtonSpacer {
+      height: 25px;
+      .swapInputButton {
+        position: relative;
+        transform: translate(-50%, -50%);
+        left: 50%;
+        top: 50%;
+        border-bottom-right-radius: 15px;
+        border-bottom-left-radius: 15px;
+        height: 25px;
+        width: 80px;
+        margin: 0;
+        border: none;
+        cursor: pointer;
+        svg {
+          height: 80%;
+          &.green {
+            fill: rgb(8, 177, 25);
+          }
+          &.yellow {
+            fill: rgb(172, 203, 19);
+          }
+          &.red {
+            fill: rgb(244, 51, 51);
+          }
+          transition: fill 0.5s ease;
+        }
+      }
+    }
+  }
+  .actions {
+    margin-top: 30px;
+    .buttons {
+      display: inline-block;
+      position: relative;
+      transform: translate(-50%, 0);
+      left: 50%;
+      button {
+        margin: 0;
+        border: none;
+        color: white;
+        background-color: $dark;
+        padding: 8px 20px;
+        cursor: pointer;
+        &:hover {
+          filter: brightness(1.6);
+        }
+        border-radius: 10px;
+      }
+    }
+  }
+}
+
+.zImageContainer {
+  height: 70vh;
+  width: 50vw;
+  .zoomedImage {
+    position: relative;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+    // background-image: url("http://hdwpro.com/wp-content/uploads/2017/01/3D-Cool-Image.jpg");
+    background-repeat: no-repeat;
+    border: 1px solid black;
+  }
+}
+
+.nextCheck {
+  background: rgba(var(--dark-rgb), 0.7);
+  display: flex;
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  div {
+    h3 {
+      color: white;
+    }
+    div {
+      width: 100%;
+      button {
+        width: 50%;
+        margin: 0;
+        border: none;
+        color: white;
+        background-color: $dark;
+        padding: 8px 20px;
+        cursor: pointer;
+        &:hover {
+          filter: brightness(1.6);
+        }
+        &#yes {
+          border-top-left-radius: 10px;
+          border-bottom-left-radius: 10px;
+          transition: 0.2s;
+          border: 1px solid $dark;
+          &:hover {
+            color: rgb(8, 177, 25);
+            border: 1px solid rgb(8, 177, 25);
+          }
+        }
+        &#no {
+          border-top-right-radius: 10px;
+          border-bottom-right-radius: 10px;
+          transition: 0.2s;
+          border: 1px solid $dark;
+          &:hover {
+            color: rgb(244, 51, 51);
+            border: 1px solid rgb(244, 51, 51);
+          }
+        }
+      }
+    }
+  }
+}
+
+.data {
+  float: left;
+  @include for-tablet-portrait-up {
+    width: 50vw;
+    height: 100%;
+  }
+}
+
+.login {
+  height: 100%;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  button {
+    background-color: $dark;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    &:hover {
+      filter: brightness(1.6);
+    }
+  }
+}

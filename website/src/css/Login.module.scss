@@ -1,0 +1,64 @@
+@import "Vars";
+
+.container {
+  width: 100vw;
+  @include for-desktop-up {
+    height: calc(100vh - #{$navHeight});
+  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  .formContainer {
+    padding: 20px;
+    border-radius: 10px;
+  }
+  input[type="text"],
+  input[type="password"],
+  input[type="email"] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+  .interact {
+    @include anchor-button;
+  }
+  button[type="submit"] {
+    background-color: $dark;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+  }
+}
+
+.interact {
+  float: right;
+  cursor: pointer;
+  text-decoration: underline;
+  &:hover {
+    color: gray;
+  }
+}
+
+#forgot {
+  &:hover {
+    text-indent: -9999px;
+    line-height: 0; /* Collapse the original line */
+  }
+  &:hover:after {
+    content: "JK! Not implemented!";
+    text-indent: 0;
+    display: block;
+    line-height: initial; /* New content takes up original line height */
+  }
+}
+
+.title {
+  text-align: center;
+}

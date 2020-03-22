@@ -1,0 +1,63 @@
+@import "Vars";
+
+.container {
+  @include for-tablet-portrait-up {
+    height: calc(100vh - #{$navHeight} - 1px);
+  }
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+
+  .infoContainer {
+    margin: 20px;
+    @include for-tablet-portrait-up {
+      margin: auto;
+    }
+    .unsavedChanges {
+      color: red;
+    }
+  }
+  div {
+    img {
+      float: right;
+      cursor: pointer;
+    }
+  }
+  button {
+    background-color: $dark;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    &:hover {
+      filter: brightness(1.6);
+    }
+  }
+  input {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+  #logout {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    margin: 12px;
+    button {
+      margin: 0;
+    }
+    input {
+      width: auto;
+      margin: 8px 8px 8px 0px;
+    }
+  }
+}

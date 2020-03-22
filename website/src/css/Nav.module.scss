@@ -1,0 +1,185 @@
+@import "Vars";
+
+.body {
+  width: 100%;
+  // background: $dark;
+  position: sticky;
+  top: 0;
+  display: table;
+  z-index: 3;
+  // border-bottom: 1px solid black;
+  height: $navHeight;
+  .desktop {
+    display: none;
+    @include for-tablet-portrait-up {
+      display: table;
+    }
+    width: 100%;
+    // background: $dark;
+    z-index: 3;
+    // border-bottom: 1px solid black;
+    height: $navHeight;
+    .account {
+      display: table-cell;
+      padding-right: 0;
+      height: 100%;
+      width: 70px;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 40px 40px;
+      background-image: url(/content/account_box_dark.svg);
+    }
+    .pages {
+      display: table-cell;
+      vertical-align: middle;
+      padding-right: 0px;
+      overflow-y: hidden;
+      button {
+        @include anchor-button;
+        cursor: pointer;
+        display: block;
+        position: relative;
+        float: right;
+        // color: #fff;
+        color: $dark;
+        text-decoration: none;
+        padding: 0.6em 1em;
+        margin: 0 0.3em;
+        transition: 0.3s ease all;
+        p {
+          position: relative;
+          padding: 0;
+          margin: 0;
+          z-index: 2;
+        }
+        &::before {
+          content: "";
+          background: #bbb;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 1;
+          transition: 0.3s ease all;
+          transform: scaleX(0);
+          transform-origin: left;
+          background-color: $dark;
+        }
+        &:hover,
+        &.active {
+          color: #fff;
+        }
+        &:hover:before {
+          transition: 0.3s ease all;
+          transform: scaleX(1);
+          // filter: brightness(30%);
+        }
+        &.active:before {
+          transition: 0s ease all;
+          transform: scaleX(1);
+          // filter: brightness(30%);
+        }
+      }
+    }
+  }
+  .mobile {
+    display: table;
+    @include for-tablet-portrait-up {
+      display: none;
+    }
+    width: 100%;
+    // background: $dark;
+    z-index: 3;
+    border-bottom: 3px inset #ebe9ed;
+    height: $navHeight;
+    .account {
+      display: table-cell;
+      padding-right: 0;
+      height: 100%;
+      width: 80px;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 30px 30px;
+      background-image: url(/content/account_box_dark.svg);
+    }
+    select {
+      padding: 5px 10px;
+      margin: 0;
+    }
+    .title {
+      display: table-cell;
+      vertical-align: middle;
+      padding-right: 0px;
+      overflow-y: hidden;
+      cursor: pointer;
+      button {
+        @include anchor-button;
+        display: block;
+        position: relative;
+        float: left;
+        // color: #fff;
+        color: $dark;
+        text-decoration: none;
+        padding: 0.6em 1em;
+        margin: 0 5px 0px 20px;
+        transition: 0.3s ease all;
+        p {
+          position: relative;
+          padding: 0;
+          margin: 0;
+          z-index: 2;
+          font-weight: 600;
+          font-size: calc(2 * #{$fontSize});
+        }
+      }
+    }
+  }
+  .banner {
+    display: table-cell;
+    background: url("/content/bannerw.png") no-repeat center;
+    background-size: 267.25px 60px;
+    height: 100%;
+    width: 317.25px;
+  }
+  .title {
+    display: table-cell;
+    vertical-align: middle;
+    padding-right: 0px;
+    overflow-y: hidden;
+    cursor: pointer;
+    button {
+      @include anchor-button;
+
+      display: block;
+      position: relative;
+      float: left;
+      // color: #fff;
+      color: $dark;
+      text-decoration: none;
+      padding: 0.6em 1em;
+      margin: 0 0.3em;
+      transition: 0.3s ease all;
+      p {
+        position: relative;
+        padding: 0;
+        margin: 0;
+        z-index: 2;
+        // font-weight: 500;
+        font-size: calc(2 * #{$fontSize});
+      }
+    }
+  }
+  .profile {
+    @include anchor-button;
+
+    position: relative;
+    display: block;
+    width: 60%;
+    height: 60%;
+    left: 50%;
+    top: 50%;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+  }
+}

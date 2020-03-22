@@ -1,0 +1,115 @@
+$dark : var(--dark);
+$navHeight : var(--nav-height);
+$fontSize : var(--font-size);
+
+@mixin anchor-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  display: inline;
+  margin: 0;
+  padding: 0;
+  font-size: $fontSize;
+}
+
+@mixin for-phone-only {
+  @media (max-width: 599px) { @content; }
+}
+@mixin for-tablet-portrait-up {
+  @media (min-width: 600px) { @content; }
+}
+@mixin for-tablet-landscape-up {
+  @media (min-width: 900px) { @content; }
+}
+@mixin for-desktop-up {
+  @media (min-width: 1200px) { @content; }
+}
+@mixin for-big-desktop-up {
+  @media (min-width: 1800px) { @content; }
+}
+
+@mixin for-portrait {
+  @media screen and (orientation: portrait) { @content; }
+}
+
+@mixin for-landscape {
+  @media screen and (orientation: landscape) { @content; }
+}
+
+@function scaleBounded($maxSize, $minSize) {
+  @return calc(#{$minSize}*1px + (#{$maxSize} - #{$minSize}) * ((100vw - 300px) / (1800 - 300)));
+}
+
+@function scaleDefault($max) {
+  @return scaleBounded($max, $max/9*5);
+}
+
+:root {
+  --dark: #252424;
+  --dark-rgb: 37, 36, 36;
+  // --dark: #1A131B;
+  --nav-height: 50px;
+  @media (min-width: 600px) {
+    --nav-height: 70px;
+  }
+  --font-size: 10px;
+  @media (min-width: 600px) {
+    --font-size: 16px;
+  }
+}
+
+
+// generic transform
+@mixin transform($transforms) {
+  -moz-transform: $transforms;
+  -o-transform: $transforms;
+  -ms-transform: $transforms;
+  -webkit-transform: $transforms;
+  transform: $transforms;
+}
+// rotate
+@mixin rotate($deg) {
+  @include transform(rotate(#{$deg}deg));
+}
+
+// scale
+@mixin scale($scale) {
+  @include transform(scale($scale));
+}
+// translate
+@mixin translate($x, $y) {
+  @include transform(translate($x, $y));
+}
+// skew
+@mixin skew($x, $y) {
+  @include transform(skew(#{$x}deg, #{$y}deg));
+}
+//transform origin
+@mixin transform-origin($origin) {
+  moz-transform-origin: $origin;
+  -o-transform-origin: $origin;
+  -ms-transform-origin: $origin;
+  -webkit-transform-origin: $origin;
+  transform-origin: $origin;
+}
+
+@mixin transition($transition) {
+  -webkit-transition: $transition;
+  -ms-transition: $transition;
+  transition: $transition;
+}
+
+@mixin absposall($all) {
+  top: $all;
+  left: $all;
+  right: $all;
+  bottom: $all;
+}
+
+@mixin abspos($top, $left, $right, $bot){
+  top: $top;
+  left: $left;
+  right: $right;
+  bottom: $bottom;
+}

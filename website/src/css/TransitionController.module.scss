@@ -1,0 +1,19 @@
+.body {
+  position: absolute;
+  display: inherit;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  opacity: 0;
+  transition: all 5000ms ease;
+  z-index: 1000;
+}
+.body.load {
+  transition: all 5000ms ease;
+  opacity: 1;
+}
+.body.hidden {
+  display: none;
+  opacity: 0;
+}

@@ -7,6 +7,8 @@ const arrUtils = require("../utils/arrays.js");
 var regulations = JSON.parse(fs.readFileSync("./regulation.json"));
 var problems = regulations.problems;
 
+var languages = ["python27", "python36", "python37", "python38", "java8", "java11", "c++11", "c++14"]
+
 var problemInfo = {};
 
 function saveProblemInfo(problem) {

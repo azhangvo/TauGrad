@@ -5,15 +5,16 @@
   "main": "index.js",
   "dependencies": {
     "bcrypt": "^3.0.7",
+    "diff": "^4.0.2",
     "fastify": "^2.11.0",
     "fastify-cors": "^3.0.1",
-    "fastify-mongodb": "^2.0.0",
     "fastify-jwt": "^1.2.1",
+    "fastify-mongodb": "^2.0.0",
     "fastify-multipart": "^1.0.4",
     "fastify-static": "^2.5.1",
     "pump": "^3.0.0",
-    "requests": "^0.3.0",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "requests": "^0.3.0"
   },
   "devDependencies": {},
   "scripts": {

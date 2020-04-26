@@ -29,7 +29,7 @@ class Register extends Component {
     if (password.value.length === 0) {
       ToastsStore.error("Please enter a password", 5000);
       return;
-    } else if (username.value.length < 8) {
+    } else if (password.value.length < 8) {
       ToastsStore.error("Passwordss must be at least 8 characters long", 5000);
       return;
     }

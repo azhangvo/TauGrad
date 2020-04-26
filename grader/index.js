@@ -73,7 +73,7 @@ fastify.get("/static/:path/:item", async (req, reply) => {
 });
 
 fastify.get("*", async (req, reply) => {
-  reply.sendFile("index.html");
+  reply.sendFile("/static/build/index.html");
   await reply;
 });
 

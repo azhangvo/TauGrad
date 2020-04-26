@@ -6,7 +6,7 @@ async function routes(fastify, options) {
 
   fastify.post("/register", async (req, reply) => {
     params = req.body; // Username, Displayname, Email, Password (Needs to be hashed), Type of Account, Timestamp created
-    if (!params.username || !params.firstname || !params.lastname || !params.email || !params.password || !params.time) {
+    if (!params.username || !params.email || !params.password || !params.time) {
       reply
         .code(422)
         .send(new Error("Missing one or more parameters for signup"));

@@ -1,4 +1,5 @@
 */node_modules
 */build
 grader/mongo.json
+grader/db/mongo.json
 grader/token.json

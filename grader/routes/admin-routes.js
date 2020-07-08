@@ -3,7 +3,7 @@ const path = require("path");
 const { exec, execFile } = require("child_process");
 const pump = require("pump");
 const fs = require("fs");
-var jsdiff = require('diff');
+var jsdiff = require("diff");
 
 const arrUtils = require("../utils/arrays.js");
 
@@ -12,7 +12,7 @@ var problems = regulations.problems;
 
 var problemInfo = {};
 
-saveProblemInfo = problem => {
+saveProblemInfo = (problem) => {
   if (problem) {
     if (problems.includes(problem) && problemInfo[problem]) {
       fs.writeFileSync(
@@ -23,7 +23,7 @@ saveProblemInfo = problem => {
       return false;
     }
   }
-  problems.forEach(problem => {
+  problems.forEach((problem) => {
     fs.writeFileSync(
       "./data/" + problem + "/info.json",
       JSON.stringify(problemInfo[problem], null, 2)
@@ -32,7 +32,7 @@ saveProblemInfo = problem => {
   return true;
 };
 
-loadProblemInfo = problem => {
+loadProblemInfo = (problem) => {
   if (problem) {
     if (fs.existsSync("./data/" + problem + "/info.json")) {
       problemInfo[problem] = JSON.parse(
@@ -42,7 +42,7 @@ loadProblemInfo = problem => {
       return false;
     }
   }
-  problems.forEach(problem => {
+  problems.forEach((problem) => {
     if (fs.existsSync("./data/" + problem + "/info.json")) {
       problemInfo[problem] = JSON.parse(
         fs.readFileSync("./data/" + problem + "/info.json")
@@ -76,14 +76,14 @@ setInterval(() => {
 }, 5000);
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function compile(files, problem, status) {
   await Promise.all(
-    Object.keys(files).map(async index => {
+    Object.keys(files).map(async (index) => {
       let filename = files[index];
-      status[index] = 1;
+      status[index][0] = 0;
 
       var id = filename.substr(0, filename.lastIndexOf("."));
       var compileCommand = "";
@@ -123,8 +123,10 @@ async function compile(files, problem, status) {
               compileCommand,
               { timeout: 4000, cwd: filePath },
               (error, stdout, stderr) => {
-                if (err) {
-                  status[index] = 4;
+                if (error) {
+                  status[index][0] = 4;
+                } else {
+                  status[index][0] = 1;
                 }
                 resolve();
               }
@@ -144,7 +146,7 @@ async function compile(files, problem, status) {
 async function run(files, status, problem, total, results, i) {
   var startTime = new Array(files.length);
   await Promise.all(
-    Object.keys(files).map(async index => {
+    Object.keys(files).map(async (index) => {
       let filename = files[index];
       var id = filename.substr(0, filename.lastIndexOf("."));
       var command = "";
@@ -152,12 +154,20 @@ async function run(files, status, problem, total, results, i) {
       var testPath = filePath + "/" + id;
       var truncFile = filename.substr(0, filename.lastIndexOf("."));
 
+      if (status[index][0] === 4) {
+        for (let j = 0; j < 10; j++) {
+          results[index][j] = false;
+          status[index][j + 1] = 5;
+        }
+        return;
+      }
+
       fs.copyFileSync(
         "./data/" + problem + "/" + problem + ".in",
         testPath + "/" + problem + ".in"
       );
 
-      status[index] = 1;
+      status[index][i] = 1;
 
       await new Promise((resolve, reject) => {
         if (
@@ -187,17 +197,36 @@ async function run(files, status, problem, total, results, i) {
               (error, stdout, stderr) => {
                 if (error) {
                   if (Date.now() - startTime[index] <= 5000) {
-                    status[index] = 5;
+                    status[index][i] = 5;
                   } else {
-                    status[index] = 3;
+                    status[index][i] = 3;
                   }
                   resolve();
                   return;
                 }
                 if (Date.now() - startTime[index] <= 5000) {
-                  status[index] = 2;
+                  status[index][i] = 2;
+                  if (fs.existsSync(testPath + "/" + problem + ".out")) {
+                    let answer = fs.readFileSync(
+                      "./tests/" + problem + "/test" + i + ".out",
+                      "utf8"
+                    );
+                    let output = fs.readFileSync(
+                      testPath + "/" + problem + ".out",
+                      "utf8"
+                    );
+                    answer = answer.replace(/^\s+|\s+$/g, "");
+                    output = output.replace(/^\s+|\s+$/g, "");
+                    diff = jsdiff.diffLines(answer, output);
+                    if (diff.length <= 1) {
+                      total[index]++;
+                      results[index][i - 1] = true;
+                    } else {
+                      results[index][i - 1] = false;
+                    }
+                  }
                 } else {
-                  status[index] = 3;
+                  status[index][i] = 3;
                 }
                 resolve();
               }
@@ -210,31 +239,36 @@ async function run(files, status, problem, total, results, i) {
                 if (error) {
                   console.log(error);
                   if (Date.now() - startTime[index] <= 5000) {
-                    status[index] = 5;
+                    status[index][i] = 5;
                   } else {
-                    status[index] = 3;
+                    status[index][i] = 3;
                   }
                   resolve();
                   return;
                 }
                 if (Date.now() - startTime[index] <= 5000) {
-                  status[index] = 2;
+                  status[index][i] = 2;
                   if (fs.existsSync(testPath + "/" + problem + ".out")) {
                     let answer = fs.readFileSync(
-                      "./tests/" + problem + "/" + problem + ".out", "utf8"
+                      "./tests/" + problem + "/test" + i + ".out",
+                      "utf8"
                     );
                     let output = fs.readFileSync(
-                      testPath + "/" + problem + ".out", "utf8"
+                      testPath + "/" + problem + ".out",
+                      "utf8"
                     );
-                    output = output.replace(/^\s+|\s+$/g, '');
+                    answer = answer.replace(/^\s+|\s+$/g, "");
+                    output = output.replace(/^\s+|\s+$/g, "");
                     diff = jsdiff.diffLines(answer, output);
-                    if(diff.length <= 1) {
+                    if (diff.length <= 1) {
                       total[index]++;
-                      results[index][i] = true;
+                      results[index][i - 1] = true;
+                    } else {
+                      results[index][i - 1] = false;
                     }
                   }
                 } else {
-                  status[index] = 3;
+                  status[index][i] = 3;
                 }
                 resolve();
               }
@@ -255,25 +289,36 @@ async function run(files, status, problem, total, results, i) {
             (error, stdout, stderr) => {
               if (error) {
                 if (Date.now() - startTime[index] <= 5000) {
-                  status[index] = 5;
-                  if (fs.existsSync(testPath + "/" + problem + ".out")) {
-                    let answer = fs.readFileSync(
-                      "./tests/" + problem + "/" + problem + ".out"
-                    );
-                    let output = fs.readFileSync(
-                      testPath + "/" + problem + ".out"
-                    );
-                  }
+                  status[index][i] = 5;
                 } else {
-                  status[index] = 3;
+                  status[index][i] = 3;
                 }
                 resolve();
                 return;
               }
               if (Date.now() - startTime[index] <= 5000) {
-                status[index] = 2;
+                status[index][i] = 2;
+                if (fs.existsSync(testPath + "/" + problem + ".out")) {
+                  let answer = fs.readFileSync(
+                    "./tests/" + problem + "/test" + i + ".out",
+                    "utf8"
+                  );
+                  let output = fs.readFileSync(
+                    testPath + "/" + problem + ".out",
+                    "utf8"
+                  );
+                  answer = answer.replace(/^\s+|\s+$/g, "");
+                  output = output.replace(/^\s+|\s+$/g, "");
+                  diff = jsdiff.diffLines(answer, output);
+                  if (diff.length <= 1) {
+                    total[index]++;
+                    results[index][i - 1] = true;
+                  } else {
+                    results[index][i - 1] = false;
+                  }
+                }
               } else {
-                status[index] = 3;
+                status[index][i] = 3;
               }
               resolve();
             }
@@ -287,6 +332,8 @@ async function run(files, status, problem, total, results, i) {
 async function routes(fastify, options) {
   // const db = fastify.mongo.client.db("globalmind");
   // const cUser = db.collection("users");
+  const db = fastify.mongo.client.db("taugrad");
+  const cScores = db.collection("scores");
 
   fastify.post(
     "/grade",
@@ -305,7 +352,7 @@ async function routes(fastify, options) {
 
       accEndings = [".cpp", ".py", ".java"];
 
-      files = files.filter(function(e) {
+      files = files.filter(function (e) {
         return accEndings.includes(path.extname(e).toLowerCase());
       });
 
@@ -334,11 +381,28 @@ async function routes(fastify, options) {
       // await sleep(20000);
 
       for (let i = 0; i < files.length; i++) {
+        var id = files[i].substr(0, files[i].lastIndexOf("."));
         console.log(files[i] + " " + status[i] + " " + total[i]);
+        let scores = await cScores.findOne({ id: id });
+        if (!scores) {
+          await cScores.insertOne({ id: id });
+        }
+        cScores.updateOne(
+          { id: id },
+          {
+            $set: {
+              [req.body.problem]: {
+                status: status[i],
+                total: total[i],
+                results: results[i],
+              },
+            },
+          }
+        );
       }
 
       reply.header("Content-Type", "application/json").send({
-        success: true
+        success: true,
       });
       return;
     }

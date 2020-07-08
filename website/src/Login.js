@@ -43,7 +43,7 @@ class Login extends Component {
     }
     return (
       <div className={styles.container}>
-        <h1 styles={styles.title}>Login</h1>
+        <h1 className={styles.title}>Login</h1>
         <div className={styles.formContainer}>
           <label>
             <b>Username or Email</b>

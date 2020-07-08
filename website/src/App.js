@@ -7,6 +7,7 @@ import API from "./API.js";
 import TransitionController from "./TransitionController.js";
 import Home from "./Home.js";
 import Submit from "./Submit.js";
+import Results from "./Results.js";
 import Profile from "./Profile.js";
 import Login from "./Login.js";
 import Register from "./Register.js";
@@ -52,6 +53,7 @@ class App extends Component {
           <Switch>
             <Route path="/" exact component={() => <Home tm={this.tm} />} />
             <Route path="/submit" component={() => <Submit tm={this.tm} />} />
+            <Route path="/results" component={() => <Results tm={this.tm} />} />
             <Route path="/profile" component={() => <Profile tm={this.tm} />} />
             <Route path="/login" component={() => <Login tm={this.tm} />} />
             <Route

@@ -9,6 +9,14 @@ class API {
   static info = {};
   static image = "/content/placeholder.png";
   static datasets = [];
+  static status = [];
+  static results = [];
+  static total = 0;
+  static lastProblem = "";
+  // static status = [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2];
+  // static results = [true, true, true, true, true, false, false, false, false, false];
+  // static total = 5;
+  // static lastProblem = "sum";
   static getLoginStatus() {
     return token !== "";
   }
@@ -107,7 +115,14 @@ class API {
             ToastsStore.success(
               "Successfully submitted your solution for " + problem + "."
             );
-            resolve(true);
+            resp.json().then(resp => {
+              this.status = resp.status
+              this.results = resp.results
+              this.total = resp.total
+              this.lastProblem = problem
+              resolve(true);
+            })
+            // resolve(true);
           } else {
             resolve(false);
             resp.json().then(resp => {

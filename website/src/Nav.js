@@ -124,7 +124,7 @@ class Nav extends Component {
                   this.props.tm.current.load("/");
                 }}
               >
-                <p>GlobalMind</p>
+                <p></p>
               </button>
             </div>
             <select onChange={this.selectorChange}>

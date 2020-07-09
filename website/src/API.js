@@ -1,7 +1,6 @@
 import { ToastsStore } from "react-toasts";
 
 var token = "";
-var imageName = "";
 
 var waitingComponents = [];
 
@@ -34,27 +33,28 @@ class API {
       fetch("/api/user", {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       }).then(
-        resp => {
+        (resp) => {
           if (resp.status === 200) {
-            resp.json().then(resp => {
+            resp.json().then((resp) => {
               this.info = resp;
+              if (!this.info.profile)
+                this.info.profile = "/content/account_box_dark.svg";
               this.image = "/images/" + resp.image;
-              imageName = resp.image;
-              waitingComponents.forEach(component => {
+              waitingComponents.forEach((component) => {
                 component.forceUpdate();
               });
               resolve();
             });
           } else {
-            resp.json().then(resp => {
+            resp.json().then((resp) => {
               ToastsStore.error(resp.message, 10000);
               if (resp.message === "Login is invalid") {
                 token = "";
                 localStorage.removeItem("token");
-                waitingComponents.forEach(component => {
+                waitingComponents.forEach((component) => {
                   component.forceUpdate();
                 });
               }
@@ -62,10 +62,46 @@ class API {
             });
           }
         },
-        err => {
+        (err) => {
           console.log(err);
         }
       );
+    });
+  }
+  static updateInfo(changes) {
+    return new Promise((resolve, reject) => {
+      if (changes.team) {
+        fetch("/api/confirmTeam", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ teamcode: changes.team }),
+        }).then(
+          (resp) => {
+            if (resp.status === 200) {
+              resp.json().then((resp) => {
+                this.info.team = resp.team;
+                waitingComponents.forEach((component) => {
+                  component.forceUpdate();
+                });
+                resolve();
+              });
+            } else {
+              resp.json().then((resp) => {
+                ToastsStore.error(resp.message, 10000);
+                resolve();
+              });
+            }
+          },
+          (err) => {
+            console.log(err);
+          }
+        );
+      } else {
+        resolve();
+      }
     });
   }
   static waitUpdate(component) {
@@ -77,21 +113,21 @@ class API {
   static getProblems() {
     return new Promise((resolve, reject) => {
       fetch("/api/problems", {
-        method: "GET"
+        method: "GET",
       }).then(
-        resp => {
+        (resp) => {
           if (resp.status === 200) {
-            resp.json().then(resp => {
+            resp.json().then((resp) => {
               resolve(resp.problems);
             });
           } else {
-            resp.json().then(resp => {
+            resp.json().then((resp) => {
               ToastsStore.error(resp.message, 10000);
               resolve(false);
             });
           }
         },
-        err => {
+        (err) => {
           console.log(err);
         }
       );
@@ -106,31 +142,31 @@ class API {
       fetch("/api/submit", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: form
+        body: form,
       }).then(
-        resp => {
+        (resp) => {
           if (resp.status === 200) {
             ToastsStore.success(
               "Successfully submitted your solution for " + problem + "."
             );
-            resp.json().then(resp => {
-              this.status = resp.status
-              this.results = resp.results
-              this.total = resp.total
-              this.lastProblem = problem
+            resp.json().then((resp) => {
+              this.status = resp.status;
+              this.results = resp.results;
+              this.total = resp.total;
+              this.lastProblem = problem;
               resolve(true);
-            })
+            });
             // resolve(true);
           } else {
             resolve(false);
-            resp.json().then(resp => {
+            resp.json().then((resp) => {
               ToastsStore.error(resp.message, 10000);
             });
           }
         },
-        err => {
+        (err) => {
           console.log(err);
         }
       );
@@ -142,25 +178,25 @@ class API {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          password: password
-        })
+          password: password,
+        }),
       }).then(
-        resp => {
+        (resp) => {
           if (resp.status === 200) {
-            resp.json().then(resp => {
+            resp.json().then((resp) => {
               resolve(resp.valid);
             });
           } else {
-            resp.json().then(resp => {
+            resp.json().then((resp) => {
               ToastsStore.error(resp.message, 10000);
               resolve(false);
             });
           }
         },
-        err => {
+        (err) => {
           console.log(err);
         }
       );
@@ -171,16 +207,16 @@ class API {
     fetch("/api/login", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         identifier: identifier,
-        password: password
-      })
+        password: password,
+      }),
     }).then(
-      resp => {
+      (resp) => {
         if (resp.status === 200) {
-          resp.json().then(resp => {
+          resp.json().then((resp) => {
             ToastsStore.success("Welcome, " + resp.username + "!");
             token = resp.token;
             if (remember) {
@@ -190,12 +226,12 @@ class API {
             tm.current.load("/submit");
           });
         } else {
-          resp.json().then(resp => {
+          resp.json().then((resp) => {
             ToastsStore.error(resp.message, 10000);
           });
         }
       },
-      err => {
+      (err) => {
         console.log(err);
       }
     );
@@ -204,16 +240,16 @@ class API {
     fetch("/api/register", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         email: email,
         username: username,
         password: password,
-        time: Math.floor(Date.now() / 1000)
-      })
+        time: Math.floor(Date.now() / 1000),
+      }),
     }).then(
-      resp => {
+      (resp) => {
         if (resp.status === 200) {
           ToastsStore.success(
             "Your account, " +
@@ -223,12 +259,12 @@ class API {
           );
           tm.current.load("/login");
         } else {
-          resp.json().then(resp => {
+          resp.json().then((resp) => {
             ToastsStore.error(resp.message, 10000);
           });
         }
       },
-      err => {
+      (err) => {
         console.log(err);
       }
     );
@@ -239,21 +275,21 @@ class API {
     fetch("/api/logout?logoutall=" + (all ? "true" : "false"), {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     }).then(
-      resp => {
+      (resp) => {
         if (resp.status === 200) {
           ToastsStore.success("Successfully logged out");
           token = "";
           tm.current.load("/login");
         } else {
-          resp.json().then(resp => {
+          resp.json().then((resp) => {
             ToastsStore.error(resp.message, 10000);
           });
         }
       },
-      err => {
+      (err) => {
         console.log(err);
       }
     );
@@ -264,23 +300,23 @@ class API {
       fetch("/api/datasets", {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       }).then(
-        resp => {
+        (resp) => {
           if (resp.status === 200) {
-            resp.json().then(resp => {
+            resp.json().then((resp) => {
               this.datasets = resp.datasets;
               resolve(resp.datasets);
             });
           } else {
-            resp.json().then(resp => {
+            resp.json().then((resp) => {
               ToastsStore.error(resp.message, 10000);
               reject();
             });
           }
         },
-        err => {
+        (err) => {
           console.log(err);
         }
       );

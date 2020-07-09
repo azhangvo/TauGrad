@@ -23,7 +23,11 @@ class Profile extends Component {
   }
   checkChanged() {
     var changed =
-      document.getElementsByName("username")[0].value.length !== 0
+      document.getElementsByName("username")[0].value.length !== 0 &&
+      document.getElementsByName("username")[0].value !==
+        API.info.user.username;
+    changed =
+      changed || document.getElementsByName("team")[0].value.length !== 0;
     if (this.state.changed !== changed) this.setState({ changed });
   }
   resizeProfileIcon() {
@@ -60,18 +64,44 @@ class Profile extends Component {
         ToastsStore.error("Please enter your password in order to save!");
         return;
       }
+
+      if(document.getElementsByName("username")[0].value.length !== 0 &&
+      document.getElementsByName("username")[0].value !==
+        API.info.user.username) {
+          ToastsStore.error("Sorry, but changing your username is not currently supported!")
+          return;
+        }
+
       API.checkPassword(
         document.getElementsByName("currentPassword")[0].value
-      ).then(success => {
+      ).then((success) => {
         document.getElementsByName("currentPassword")[0].value = "";
         if (!success) {
           ToastsStore.error("Invalid password");
           return;
         }
-        ToastsStore.success("Successfully updated settings");
-        // this.props.tm.current.load("/label")
-        API.retrieveInfo().then(() => {
-          this.forceUpdate();
+
+        var changes = {};
+        // if (
+        //   document.getElementsByName("username")[0].value.length !== 0 &&
+        //   document.getElementsByName("username")[0].value !==
+        //     API.info.user.username
+        // )
+        //   changes["username"] = document.getElementsByName("username")[0].value;
+
+        if (document.getElementsByName("team")[0].value.length !== 0)
+          changes["team"] = document.getElementsByName("team")[0].value;
+
+        API.updateInfo(changes).then(() => {
+          ToastsStore.success("Successfully updated settings");
+          // this.props.tm.current.load("/label")
+          API.retrieveInfo().then(() => {
+            document.getElementsByName("username")[0].value = "";
+            document.getElementsByName("currentPassword")[0].value = "";
+            document.getElementsByName("team")[0].value = "";
+            this.checkChanged();
+            this.forceUpdate();
+          });
         });
       });
     } else {
@@ -95,7 +125,6 @@ class Profile extends Component {
               placeholder={API.info["user"]["username"]}
               name="username"
               onChange={this.checkChanged}
-              required
             />
             <label id="currentPassword">Current Password</label>
             <input
@@ -103,6 +132,15 @@ class Profile extends Component {
               placeholder="Type in your password to save changes"
               name="currentPassword"
               required={this.state.changed ? true : false}
+            />
+            <label id="team">
+              Team - <b>{API.info.team ? API.info.team : "None"}</b>
+            </label>
+            <input
+              type="text"
+              placeholder="Enter Code (Ask your team lead)"
+              name="team"
+              onChange={this.checkChanged}
             />
             <button type="submit" onClick={this.save}>
               Save

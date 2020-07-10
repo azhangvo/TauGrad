@@ -206,6 +206,19 @@ async function routes(fastify, options) {
       reply.send({ success: true, team: team.teamname });
     }
   );
+
+  fastify.post(
+    "/starttime",
+    { preValidation: [fastify.authenticate] },
+    async (req, reply) => {
+      var data = await c.findOne({ id: req.user.id });
+      // contains group code and starting time
+      var params = req.body
+      await c.updateOne({ id: user.id }, { $set: {data.teamcode: params.teamcode, data.starttime: params.starttime} });
+      reply.code(200).send({ success: true });
+      return;
+    }
+  );
 }
 
 module.exports = routes;

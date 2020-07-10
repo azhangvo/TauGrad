@@ -3,7 +3,7 @@ var request = require("request");
 const path = require("path");
 
 const fastify = require("fastify")({
-  logger: true
+  logger: true,
   // https: {
   //   key: fs.readFileSync("./key.pem"),
   //   cert: fs.readFileSync("./cert.pem")
@@ -17,25 +17,28 @@ var connectionString = `mongodb://${mongoOptions.user}:${encodeURIComponent(
 
 fastify.register(require("fastify-mongodb"), {
   forceClose: true,
-  url: connectionString
+  url: connectionString,
 });
 
 // fastify.register(require("./db/mongo.js"), { uri_decode_auth: true});
 
-fastify.register(require("fastify-multipart"), { addToBody: true, limits: {
-  fieldNameSize: 1000,
-  fieldSize: 1000000,
-  fileSize: 10000000
-}});
+fastify.register(require("fastify-multipart"), {
+  addToBody: true,
+  limits: {
+    fieldNameSize: 1000,
+    fieldSize: 1000000,
+    fileSize: 10000000,
+  },
+});
 
 fastify.register(require("fastify-cors"), {
-  origin: true
+  origin: true,
 });
 
 fastify.register(require("fastify-static"), {
   root: path.join(__dirname, "static"),
   prefix:
-    "/oijawfweifjaiwbgiajofajwefaefawefawefawefawieofjaoweifjawefiadjfaoiwefjaieofjasfioaejfiadfjbnsdfjgrhjigfkjgfdfghjktfdxcvbnmkutrdcvbnmjkitdcvbnjydcvbnjtdszxcvbhtrdfgbjkitfdcvbnmkiyfvbn,kjgvc bnmkjgfvbhmkligtfcbnmjgfcvbhjygcxc vbnjgfdcvbnmjgfiajwefaiowefoiawejifaoefghauefhaovbaweofawioefjairgniaoedfajefijaoaioedvnaiodnvfiawenfoawiefiaowejfnodsfvnioawawefaiwefawefnjiaodfjoawefawbeivoawnefaowifnaoiwnviawoefiaowjfoiwaefjawioefiowahfawbvuaeifvaheugfaiehguahgvuabvfauiehfauwehniuadhvuaheifawireogjaiergiajerfjiaejfoiajwefoahrguiahoifjawfoiadvnioandvioajdfioajdiovajifhaorgvhoiafvjaioenviaoerjfoajwiofajoidviahivoawjfoiwaefhiaohdovfiawdjfioawhiuvohaerhvaiofhvuoahweifawiofiaevhiaoefhviaojfeioajwefjawiofhjdefianwerfoawef/" // optional: default '/'
+    "/oijawfweifjaiwbgiajofajwefaefawefawefawefawieofjaoweifjawefiadjfaoiwefjaieofjasfioaejfiadfjbnsdfjgrhjigfkjgfdfghjktfdxcvbnmkutrdcvbnmjkitdcvbnjydcvbnjtdszxcvbhtrdfgbjkitfdcvbnmkiyfvbn,kjgvc bnmkjgfvbhmkligtfcbnmjgfcvbhjygcxc vbnjgfdcvbnmjgfiajwefaiowefoiawejifaoefghauefhaovbaweofawioefjairgniaoedfajefijaoaioedvnaiodnvfiawenfoawiefiaowejfnodsfvnioawawefaiwefawefnjiaodfjoawefawbeivoawnefaowifnaoiwnviawoefiaowjfoiwaefjawioefiowahfawbvuaeifvaheugfaiehguahgvuabvfauiehfauwehniuadhvuaheifawireogjaiergiajerfjiaejfoiajwefoahrguiahoifjawfoiadvnioandvioajdfioajdiovajifhaorgvhoiafvjaioenviaoerjfoajwiofajoidviahivoawjfoiwaefhiaohdovfiawdjfioawhiuvohaerhvaiofhvuoahweifawiofiaevhiaoefhviaojfeioajwefjawiofhjdefianwerfoawef/", // optional: default '/'
 });
 
 fastify.register(require("./auth.js"));

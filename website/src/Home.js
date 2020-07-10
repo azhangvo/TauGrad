@@ -6,8 +6,7 @@ import API from "./API.js";
 class Home extends Component {
   constructor(props) {
     super(props);
-    this.text = "Yay"
-    console.log("Reached")
+    this.text = "Yay";
   }
   startTimer(){
     return ;
@@ -60,8 +59,9 @@ class Home extends Component {
     return (
       // not logged in, shows normal things instead
       <div className={styles.container}>
-        <h1 className={styles.title}>Welcome</h1>
-
+        {this.text.split("\n").map((i, key) => {
+          return <div key={key}>{i}</div>;
+        })}
       </div>
     );
   }

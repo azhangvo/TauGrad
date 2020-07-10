@@ -3,6 +3,7 @@ async function routes(fastify, options) {
   const saltRounds = 8;
   const db = fastify.mongo.client.db("taugrad");
   const c = db.collection("users");
+  const cTeams = db.collection("teams");
 
   fastify.post("/register", async (req, reply) => {
     params = req.body; // Username, Displayname, Email, Password (Needs to be hashed), Type of Account, Timestamp created
@@ -54,7 +55,7 @@ async function routes(fastify, options) {
       dataset: "",
       image: "",
       tutorial: false,
-      firstlogin: -1
+      firstlogin: -1,
     });
     // const token = fastify.jwt.sign({
     //   id: id,
@@ -114,7 +115,7 @@ async function routes(fastify, options) {
       id: user.id,
       username: user.username,
       email: user.email,
-      firstlogin: user.firstlogin
+      firstlogin: user.firstlogin,
     });
     reply.send({ token: token, username: user.username });
     return;
@@ -125,7 +126,7 @@ async function routes(fastify, options) {
     async (req, reply) => {
       params = req.body;
       if (!params.password) {
-        reply.code(422).send(new Error("Missing parameter"));
+        reply.code(400).send(new Error("Missing parameter"));
         return;
       }
       user = await c.findOne({ id: req.user.id });
@@ -147,7 +148,6 @@ async function routes(fastify, options) {
     async (req, reply) => {
       params = req.query;
       user = await c.findOne({ id: req.user.id });
-      console.log(params["logoutall"]);
       if (params["logoutall"] === "true") {
         await c.updateOne({ id: req.user.id }, { $set: { firstlogin: -1 } });
       }
@@ -160,13 +160,44 @@ async function routes(fastify, options) {
     { preValidation: [fastify.authenticate] },
     async (req, reply) => {
       var data = await c.findOne({ id: req.user.id });
+      var team = "None";
+      if (data.teamname) team = data.teamname;
       reply.send({
         user: req.user,
-        dataset: data.dataset,
-        image: data.currentImage,
-        profile: data.profile
+        profile: data.profile,
+        team: team,
       });
       return;
+    }
+  );
+
+  fastify.post(
+    "/confirmTeam",
+    { preValidation: [fastify.authenticate] },
+    async (req, reply) => {
+      var params = req.body;
+      if (!params) {
+        reply.code(400).send(new Error("Missing body"));
+        return;
+      }
+      if (!params.teamcode) {
+        reply.code(400).send(new Error("Missing team code"));
+        return;
+      }
+      var team = await cTeams.findOne({ code: params.teamcode });
+      if (!team) {
+        reply.code(404).send(new Error("Team not found"));
+        return;
+      }
+
+      var data = await c.findOne({ id: req.user.id });
+
+      await c.updateOne(
+        { id: req.user.id },
+        { $set: { team: team.id, teamname: team.teamname } }
+      );
+
+      reply.send({ success: true, team: team.teamname });
     }
   );
 

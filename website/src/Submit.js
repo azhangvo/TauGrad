@@ -71,6 +71,7 @@ class Submit extends Component {
           this.setState({ language: null, problem: null });
           document.getElementById("input").value = "";
           this.fileChange({ target: document.getElementById("input") });
+          this.props.tm.current.load("/results")
         }
       });
       return;

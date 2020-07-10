@@ -244,20 +244,21 @@ class API {
     );
     token = "";
   }
-  static getDatasets() {
+  static startTimer(code) {
     return new Promise((resolve, reject) => {
-      fetch("/api/datasets", {
-        method: "GET",
+      fetch("/api/starttime", {
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`
-        }
+        },
+        body: JSON.stringify({
+          teamcode: code,
+          starttime: Math.floor(Date.now() / 1000)
+        })
       }).then(
         resp => {
           if (resp.status === 200) {
-            resp.json().then(resp => {
-              this.datasets = resp.datasets;
-              resolve(resp.datasets);
-            });
+            // success
           } else {
             resp.json().then(resp => {
               ToastsStore.error(resp.message, 10000);

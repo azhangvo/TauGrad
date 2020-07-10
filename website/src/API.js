@@ -300,28 +300,16 @@ class API {
       fetch("/api/starttime", {
         method: "POST",
         headers: {
-<<<<<<< HEAD
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           teamcode: code,
           starttime: Math.floor(Date.now() / 1000)
         })
-=======
-          Authorization: `Bearer ${token}`,
-        },
->>>>>>> 9de01298c1625b1dbaee8381ff302b8632db5604
       }).then(
         (resp) => {
           if (resp.status === 200) {
-<<<<<<< HEAD
             // success
-=======
-            resp.json().then((resp) => {
-              this.datasets = resp.datasets;
-              resolve(resp.datasets);
-            });
->>>>>>> 9de01298c1625b1dbaee8381ff302b8632db5604
           } else {
             resp.json().then((resp) => {
               ToastsStore.error(resp.message, 10000);

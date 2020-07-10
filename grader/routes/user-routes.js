@@ -192,6 +192,12 @@ async function routes(fastify, options) {
 
       var data = await c.findOne({ id: req.user.id });
 
+      // TODO: Add team member IDs to team document
+      // if(data.team) {
+      //   let prevTeam = cTeams.findOne({ id: data.team });
+      //
+      // }
+
       await c.updateOne(
         { id: req.user.id },
         { $set: { team: team.id, teamname: team.teamname } }

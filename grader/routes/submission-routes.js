@@ -339,7 +339,8 @@ async function run(files, status, problem, total, results, i) {
 
 async function routes(fastify, options) {
   const db = fastify.mongo.client.db("taugrad");
-  const cUser = db.collection("users");
+  const cUsers = db.collection("users");
+  const cTeams = db.collection("teams");
 
   fastify.post(
     "/submit",
@@ -420,7 +421,7 @@ async function routes(fastify, options) {
         reply.code(409).send(new Error("Language not found or supported"));
       }
 
-      let cu = await cUser.findOne({ id: req.user.id });
+      let cu = await cUsers.findOne({ id: req.user.id });
 
       if (problemInfo[req.body.problem][req.user.id]) {
         fs.unlink(
@@ -475,18 +476,16 @@ async function routes(fastify, options) {
       //     }
       //   }
       // } else {
-        for (let i = 1; i <= 10; i++) {
-          if (
-            !fs.existsSync("./tests/" + req.body.problem + "/test" + i + ".in")
-          )
-            continue;
-          fs.copyFileSync(
-            "./tests/" + req.body.problem + "/test" + i + ".in",
-            "./data/" + req.body.problem + "/" + req.body.problem + ".in"
-          );
-          await sleep(100);
-          await run(files, status, req.body.problem, total, results, i);
-        }
+      for (let i = 1; i <= 10; i++) {
+        if (!fs.existsSync("./tests/" + req.body.problem + "/test" + i + ".in"))
+          continue;
+        fs.copyFileSync(
+          "./tests/" + req.body.problem + "/test" + i + ".in",
+          "./data/" + req.body.problem + "/" + req.body.problem + ".in"
+        );
+        await sleep(100);
+        await run(files, status, req.body.problem, total, results, i);
+      }
       // }
 
       reply.header("Content-Type", "application/json").send({
@@ -508,6 +507,31 @@ async function routes(fastify, options) {
       ),
     });
   });
+
+  fastify.get(
+    "/writtenProblems",
+    { preValidation: [fastify.authenticate] },
+    async (req, reply) => {
+      var data = await cUsers.findOne({ id: req.user.id });
+
+      if(!data.team) {
+        reply.code(400).send(new Error("You are not in a team, join one"))
+      }
+
+      var teamData = await cTeams.findOne({ id: data.team });
+      if (!teamData.start) {
+        reply.code(400).send(new Error("Time has not started yet, make sure to click the big button"));
+        return;
+      }
+
+      if(Date.now() - teamData.start >= 10800000) {
+        reply.code(400).send(new Error("Your time is up!"))
+        return;
+      }
+
+      reply.sendFile("pages/problems.html")
+    }
+  );
 }
 
 module.exports = routes;

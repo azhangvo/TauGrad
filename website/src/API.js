@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { ToastsStore } from "react-toasts";
 
 var token = "";
@@ -132,6 +134,34 @@ class API {
         }
       );
     });
+  }
+  static getWrittenProblems() {
+    return new Promise((resolve, reject) => {
+      fetch("/api/writtenProblems", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then(
+        (resp) => {
+          if (resp.status === 200) {
+            resp.text().then(site => {
+              console.log(site)
+              resolve(site)
+            })
+            // resolve(true);
+          } else {
+            resolve(<p> Failed </p>);
+            resp.json().then((resp) => {
+              ToastsStore.error(resp.message, 10000);
+            });
+          }
+        },
+        (err) => {
+          console.log(err);
+        }
+      );
+    })
   }
   static submit(file, language, problem) {
     return new Promise((resolve, reject) => {

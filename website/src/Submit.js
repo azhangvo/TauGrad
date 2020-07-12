@@ -15,7 +15,8 @@ class Submit extends Component {
       { value: "python36", label: "Python 3.6" },
       { value: "python37", label: "Python 3.7" },
       { value: "python38", label: "Python 3.8" },
-      { value: "java", label: "Java" },
+      { value: "java8", label: "Java 8" },
+      { value: "java11", label: "Java 11" },
       { value: "c++11", label: "C++ 11" },
       { value: "c++14", label: "C++ 14" }
     ];

@@ -6,6 +6,7 @@ import API from "./API.js";
 
 import TransitionController from "./TransitionController.js";
 import Home from "./Home.js";
+import Problems from "./Problems.js"
 import Submit from "./Submit.js";
 import Results from "./Results.js";
 import Profile from "./Profile.js";
@@ -52,6 +53,7 @@ class App extends Component {
           <Nav tm={this.tm} location={document.location.href} />
           <Switch>
             <Route path="/" exact component={() => <Home tm={this.tm} />} />
+            <Route path="/problems" component={() => <Problems tm={this.tm} />} />
             <Route path="/submit" component={() => <Submit tm={this.tm} />} />
             <Route path="/results" component={() => <Results tm={this.tm} />} />
             <Route path="/profile" component={() => <Profile tm={this.tm} />} />

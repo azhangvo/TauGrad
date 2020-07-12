@@ -208,14 +208,26 @@ async function routes(fastify, options) {
   );
 
   fastify.post(
-    "/starttime",
+    "/startTime",
     { preValidation: [fastify.authenticate] },
     async (req, reply) => {
       var data = await c.findOne({ id: req.user.id });
-      // contains group code and starting time
-      var params = req.body
-      await c.updateOne({ id: user.id }, { $set: {data.teamcode: params.teamcode, data.starttime: params.starttime} });
-      reply.code(200).send({ success: true });
+
+      if(!data.team) {
+        reply.code(400).send(new Error("You are not in a team, join one"))
+      }
+
+      var teamData = await cTeams.findOne({ id: data.team });
+      if (teamData.start) {
+        reply.code(400).send(new Error("Time has already started"));
+        return;
+      }
+
+      await cTeams.updateOne(
+        { id: data.team },
+        { $set: { start: Date.now() } }
+      );
+      reply.send({ success: true });
       return;
     }
   );

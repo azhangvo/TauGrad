@@ -1,4 +1,4 @@
 {
-  "problemAccess": [1, 3],
-  "problems": ["Problem1", "Problem2", "sum"]
+  "problemAccess": [1, 1],
+  "problems": ["sum"]
 }

@@ -161,11 +161,23 @@ async function routes(fastify, options) {
     async (req, reply) => {
       var data = await c.findOne({ id: req.user.id });
       var team = "None";
-      if (data.teamname) team = data.teamname;
+      var start = 0,
+        ended;
+      if (data.teamname) {
+        team = data.teamname;
+        var teamData = await cTeams.findOne({ id: data.team });
+        if (Date.now() >= 1595160000000) {
+          start = teamData.start;
+          ended = Date.now() - teamData.start < 10800000;
+        }
+      }
       reply.send({
         user: req.user,
         profile: data.profile,
         team: team,
+        competitionStart: Date.now() >= 1595160000000,
+        started: start,
+        ended: ended,
       });
       return;
     }
@@ -213,8 +225,18 @@ async function routes(fastify, options) {
     async (req, reply) => {
       var data = await c.findOne({ id: req.user.id });
 
-      if(!data.team) {
-        reply.code(400).send(new Error("You are not in a team, join one"))
+      if (!data.team) {
+        reply.code(400).send(new Error("You are not in a team, join one"));
+      }
+
+      if (Date.now() < 1595160000000) {
+        reply
+          .code(400)
+          .send(
+            new Error(
+              "The contest has not started yet! It starts on July 19th at 8:00AM Eastern."
+            )
+          );
       }
 
       var teamData = await cTeams.findOne({ id: data.team });

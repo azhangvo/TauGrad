@@ -126,20 +126,29 @@ async function compile(files, problem, status) {
             " " +
             filename;
         await new Promise((resolve, reject) => {
-          exec("rm " + testPath + "/" + truncFile, (err, sout, serr) => {
-            exec(
-              compileCommand,
-              { timeout: 4000, cwd: filePath },
-              (error, stdout, stderr) => {
-                if (error) {
-                  status[index][0] = 4;
-                } else {
-                  status[index][0] = 1;
-                }
-                resolve();
+          if (fs.existsSync(testPath + "/" + truncFile))
+            fs.unlinkSync(testPath + "/" + truncFile);
+          if (fs.existsSync(testPath + "/" + truncFile + ".exe"))
+            fs.unlinkSync(testPath + "/" + truncFile + ".exe");
+          // exec("rm " + testPath + "/" + truncFile, (err, sout, serr) => {
+          //   exec(
+          //     "rm " + testPath + "/" + truncFile + ".exe",
+          //     (err, sout, serr) => {
+          exec(
+            compileCommand,
+            { timeout: 8000, cwd: filePath },
+            (error, stdout, stderr) => {
+              if (error) {
+                status[index][0] = 4;
+              } else {
+                status[index][0] = 1;
               }
-            );
-          });
+              resolve();
+            }
+          );
+          //     }
+          //   );
+          // });
         });
       } else {
         fs.copyFileSync(
@@ -514,22 +523,28 @@ async function routes(fastify, options) {
     async (req, reply) => {
       var data = await cUsers.findOne({ id: req.user.id });
 
-      if(!data.team) {
-        reply.code(400).send(new Error("You are not in a team, join one"))
+      if (!data.team) {
+        reply.code(400).send(new Error("You are not in a team, join one"));
       }
 
       var teamData = await cTeams.findOne({ id: data.team });
       if (!teamData.start) {
-        reply.code(400).send(new Error("Time has not started yet, make sure to click the big button"));
+        reply
+          .code(400)
+          .send(
+            new Error(
+              "Time has not started yet, make sure to click the big button"
+            )
+          );
         return;
       }
 
-      if(Date.now() - teamData.start >= 10800000) {
-        reply.code(400).send(new Error("Your time is up!"))
+      if (Date.now() - teamData.start >= 10800000) {
+        reply.code(400).send(new Error("Your time is up!"));
         return;
       }
 
-      reply.sendFile("pages/problems.html")
+      reply.sendFile("pages/problems.html");
     }
   );
 }

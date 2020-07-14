@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 import { ToastsStore } from "react-toasts";
 
@@ -42,6 +42,8 @@ class API {
           if (resp.status === 200) {
             resp.json().then((resp) => {
               this.info = resp;
+              this.started = resp.started;
+              this.ended = resp.ended;
               if (!this.info.profile)
                 this.info.profile = "/content/account_box_dark.svg";
               this.image = "/images/" + resp.image;
@@ -112,6 +114,26 @@ class API {
   static getInfo() {
     return this.info;
   }
+  static startTime() {
+    return new Promise((resolve, reject) => {
+      fetch("/api/startTime", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }).then((resp) => {
+        if (resp.status === 200) {
+          API.started = true;
+          resolve();
+        } else {
+          resp.json().then((resp) => {
+            ToastsStore.error(resp.message, 10000);
+            resolve(false);
+          });
+        }
+      });
+    });
+  }
   static getProblems() {
     return new Promise((resolve, reject) => {
       fetch("/api/problems", {
@@ -140,20 +162,18 @@ class API {
       fetch("/api/writtenProblems", {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       }).then(
         (resp) => {
           if (resp.status === 200) {
-            resp.text().then(site => {
-              console.log(site)
-              resolve(site)
-            })
-            // resolve(true);
+            resp.text().then((site) => {
+              resolve(site);
+            });
           } else {
-            resolve(<p> Failed </p>);
             resp.json().then((resp) => {
               ToastsStore.error(resp.message, 10000);
+              resolve("<p> Failed </p>");
             });
           }
         },
@@ -161,7 +181,7 @@ class API {
           console.log(err);
         }
       );
-    })
+    });
   }
   static submit(file, language, problem) {
     return new Promise((resolve, reject) => {
@@ -247,7 +267,7 @@ class API {
       (resp) => {
         if (resp.status === 200) {
           resp.json().then((resp) => {
-            ToastsStore.success("Welcome, " + resp.username + "!");
+            ToastsStore.success("Welcome, " + resp.username + "! Head over to the submission page to do some testing before the competition!", 20000); // TODO: Remove testing message
             token = resp.token;
             if (remember) {
               localStorage.setItem("token", token);
@@ -330,12 +350,12 @@ class API {
       fetch("/api/starttime", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           teamcode: code,
-          starttime: Math.floor(Date.now() / 1000)
-        })
+          starttime: Math.floor(Date.now() / 1000),
+        }),
       }).then(
         (resp) => {
           if (resp.status === 200) {

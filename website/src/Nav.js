@@ -27,7 +27,7 @@ class Nav extends Component {
           className={styles.body}
           style={{
             position: this.sticky ? "sticky" : "relative",
-            borderBottom: this.sticky ? "1px solid black" : ""
+            borderBottom: this.sticky ? "1px solid black" : "",
           }}
         >
           <div className={styles.desktop}>
@@ -82,6 +82,19 @@ class Nav extends Component {
               >
                 <p>About</p>
               </button>*/}
+              <button
+                onClick={() => {
+                  this.props.tm.current.load("/problems");
+                }}
+                className={
+                  this.props.tm.current.getLocation() === "/problems"
+                    ? styles.active
+                    : ""
+                }
+              >
+                <p>Problems</p>
+              </button>
+              ;
               <button
                 onClick={() => {
                   this.props.tm.current.load("/submit");

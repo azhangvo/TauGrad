@@ -1,0 +1,43 @@
+@import "Vars";
+
+.container {
+  width: 100vw;
+  @include for-tablet-portrait-up {
+    height: calc(100vh - 3 * #{$navHeight});
+  }
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  .dataContainer {
+    margin: 50px;
+    max-width: 800px;
+  }
+
+  .confirmWindow {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.85);
+    height: 100vh;
+    width: 100vw;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  button {
+    background-color: $dark;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    &:hover {
+      filter: brightness(1.6);
+    }
+  }
+}

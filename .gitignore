@@ -5,3 +5,4 @@ grader/db/mongo.json
 grader/token.json
 grader/data
 grader/tests
+grader/static/build

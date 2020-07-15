@@ -75,8 +75,18 @@ fastify.get("/static/:path/:item", async (req, reply) => {
   await reply;
 });
 
+fastify.get("/:file", async (req, reply) => {
+  if (fs.existsSync("static/build/" + req.params["file"])) {
+    reply.sendFile("build/" + req.params["file"]);
+    await reply;
+    return;
+  }
+  reply.sendFile("build/index.html");
+  await reply;
+});
+
 fastify.get("*", async (req, reply) => {
-  reply.sendFile("/static/build/index.html");
+  reply.sendFile("build/index.html");
   await reply;
 });
 

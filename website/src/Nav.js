@@ -142,8 +142,8 @@ class Nav extends Component {
             </div>
             <select onChange={this.selectorChange}>
               <option value="/">Home</option>
-              <option value="/label">Label</option>
-              <option value="/about">About</option>
+              <option value="/submit">Submit</option>
+              <option value="/problems">Problems</option>
               <option value={API.info["user"] ? "/profile" : "/login"}>
                 {API.getLoginStatus()
                   ? API.info["user"]
@@ -151,7 +151,6 @@ class Nav extends Component {
                     : "…"
                   : "Login"}
               </option>
-              <option value="/profile">Profile</option>
             </select>
             <div className={styles.account}>
               <button

@@ -12,7 +12,12 @@ import styles from "./css/Submit.module.scss";
 class Submit extends Component {
   constructor(props) {
     super(props);
-    this.state = { language: null, problem: null, problemOptions: [] };
+    this.state = {
+      language: null,
+      problem: null,
+      problemOptions: [],
+      submitted: false,
+    };
     this.languageOptions = [
       { value: "python27", label: "Python 2.7" },
       // { value: "python36", label: "Python 3.6" },
@@ -79,6 +84,8 @@ class Submit extends Component {
           this.props.tm.current.load("/results");
         }
       });
+      ToastsStore.info("Submitting...");
+      this.setState({ submitted: true });
       return;
     } else if (errorArray.length === 1) {
       error = errorArray[0];
@@ -96,8 +103,11 @@ class Submit extends Component {
 
   CheckTimer() {
     if (!API.getLoginStatus() && !API.startCompetition) {
-      return <CompetitionNotStarted />
-    } else if (API.started && !API.ended || API.getLoginStatus() && !API.startCompetition) {
+      return <CompetitionNotStarted />;
+    } else if (
+      (API.started && !API.ended) ||
+      (API.getLoginStatus() && !API.startCompetition)
+    ) {
       return (
         <div className={styles.container}>
           <div
@@ -152,8 +162,19 @@ class Submit extends Component {
             </div>
             <br />
             <br />
-            <div className={styles.subButtonContainer}>
-              <button type="submit" onClick={this.submit}>
+            <div
+              className={
+                styles.subButtonContainer +
+                " " +
+                (this.state.submitted ? styles.disabled : "")
+              }
+            >
+              <button
+                className={this.state.submitted ? styles.disabled : ""}
+                type="submit"
+                onClick={this.submit}
+                disabled={this.state.submitted ? "true" : ""}
+              >
                 Submit
               </button>
             </div>
@@ -180,7 +201,7 @@ class Submit extends Component {
     } else if (!API.started) {
       return <StartTimer />;
     } else if (API.ended) {
-      return <CompetitionEnded />
+      return <CompetitionEnded />;
     }
   }
 }

@@ -63,6 +63,9 @@
         &:hover {
           filter: brightness(1.6);
         }
+        &.disabled:hover {
+          filter: brightness(1);
+        }
       }
     }
   }

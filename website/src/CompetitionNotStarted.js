@@ -1,7 +1,5 @@
 import React, { Component } from "react";
 
-import API from "./API.js";
-
 import styles from "./css/CompetitionNotStarted.module.scss";
 
 class CompetitionNotStarted extends Component {

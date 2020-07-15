@@ -11,9 +11,11 @@ class Problems extends Component {
     super(props);
     this.state = { site: "<p>Loading</p>" };
     this.lastUpdate = 0;
-    API.getWrittenProblems().then((site) => {
-      this.setState({ site: site });
-    });
+    if (API.startCompetition) {
+      API.getWrittenProblems().then((site) => {
+        this.setState({ site: site });
+      });
+    }
   }
   render() {
     if (!API.startCompetition) {

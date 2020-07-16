@@ -115,21 +115,25 @@ async function compile(files, problem, status) {
             "g++ -std=c++17 -o " + id + "/" + truncFile + " " + filename;
         if (problemInfo[problem][id].language == "java8")
           compileCommand =
-            "update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java && javac -d " +
+            "update-alternatives --set javac /usr/lib/jvm/java-8-openjdk-amd64/bin/javac && javac -d " +
             id +
             " " +
             filename;
         if (problemInfo[problem][id].language == "java11")
           compileCommand =
-            "update-alternatives --set java /usr/lib/jvm/java-11-oracle/bin/java && javac -d " +
+            "update-alternatives --set javac /usr/lib/jvm/java-11-oracle/bin/javac && javac -d " +
             id +
             " " +
             filename;
         await new Promise((resolve, reject) => {
-          if (fs.existsSync(testPath + "/" + truncFile))
-            fs.unlinkSync(testPath + "/" + truncFile);
-          if (fs.existsSync(testPath + "/" + truncFile + ".exe"))
-            fs.unlinkSync(testPath + "/" + truncFile + ".exe");
+          let files = fs.readdirSync(testPath);
+          for (const file of files) {
+            fs.unlinkSync(path.join(testPath, file));
+          }
+          // if (fs.existsSync(testPath + "/" + truncFile))
+          //   fs.unlinkSync(testPath + "/" + truncFile);
+          // if (fs.existsSync(testPath + "/" + truncFile + ".exe"))
+          //   fs.unlinkSync(testPath + "/" + truncFile + ".exe");
           // exec("rm " + testPath + "/" + truncFile, (err, sout, serr) => {
           //   exec(
           //     "rm " + testPath + "/" + truncFile + ".exe",
@@ -151,6 +155,26 @@ async function compile(files, problem, status) {
           // });
         });
       } else {
+        let files = fs.readdirSync(testPath);
+        for (const file of files) {
+          fs.unlinkSync(path.join(testPath, file));
+        }
+        await sleep(500);
+        // await new Promise((resolve, reject) => {
+        //   exec(
+        //     "cp ./data/" +
+        //       problem +
+        //       "/" +
+        //       filename +
+        //       " " +
+        //       testPath +
+        //       "/" +
+        //       filename,
+        //     (error, stdout, stderr) => {
+        //       resolve();
+        //     }
+        //   );
+        // });
         fs.copyFileSync(
           "./data/" + problem + "/" + filename,
           testPath + "/" + filename
@@ -194,20 +218,35 @@ async function run(files, status, problem, total, results, i) {
           if (problemInfo[problem][id].language.startsWith("c++"))
             command = "./" + truncFile;
           if (problemInfo[problem][id].language.startsWith("java")) {
+            let className = null;
+
+            let files = fs.readdirSync(testPath);
+            for (const file of files) {
+              if (file.endsWith(".class")) {
+                className = file.substring(0, file.length - 6);
+                break;
+              }
+            }
+            if (!className) {
+              status[index][i] = 5;
+              resolve();
+              return;
+            }
+
             if (problemInfo[problem][id].language == "java8")
               command =
                 "update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java && java " +
-                filename;
+                className;
             if (problemInfo[problem][id].language == "java11")
               command =
                 "update-alternatives --set java /usr/lib/jvm/java-11-oracle/bin/java && java " +
-                filename;
+                className;
           }
 
           if (fs.existsSync(testPath + "/" + problem + ".out"))
             fs.unlinkSync(testPath + "/" + problem + ".out");
           startTime[index] = Date.now();
-          if (command.startsWith("java")) {
+          if (problemInfo[problem][id].language.startsWith("java")) {
             exec(
               command,
               { timeout: 7000, cwd: testPath },
@@ -254,7 +293,6 @@ async function run(files, status, problem, total, results, i) {
               { timeout: 7000, cwd: testPath + "/" },
               (error, stdout, stderr) => {
                 if (error) {
-                  console.log(error);
                   if (Date.now() - startTime[index] <= 5000) {
                     status[index][i] = 5;
                   } else {
@@ -300,6 +338,8 @@ async function run(files, status, problem, total, results, i) {
             command = "python3.7 " + filename;
           if (problemInfo[problem][id].language == "python38")
             command = "python3.8 " + filename;
+          startTime[index] = Date.now();
+
           exec(
             command,
             { timeout: 7000, cwd: testPath },
@@ -432,6 +472,8 @@ async function routes(fastify, options) {
 
       let cu = await cUsers.findOne({ id: req.user.id });
 
+      // TODO: Last submission
+
       if (problemInfo[req.body.problem][req.user.id]) {
         fs.unlink(
           "./data/" +
@@ -454,7 +496,10 @@ async function routes(fastify, options) {
       let stream = fs.createWriteStream(
         "./data/" + req.body.problem + "/" + req.user.id + ending
       );
-      stream.write(s.data.toString());
+      let data = s.data.toString();
+      if (type.startsWith("java"))
+        data = data.replace(/public[ ]+class/, "class");
+      stream.write(data);
       stream.end();
 
       let files = [req.user.id + ending];

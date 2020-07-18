@@ -160,7 +160,8 @@ async function routes(fastify, options) {
     { preValidation: [fastify.authenticate] },
     async (req, reply) => {
       var data = await c.findOne({ id: req.user.id });
-      var team = "None";
+      var team = "None",
+        teamcode = null;
       var start = 0,
         ended;
       if (data.teamname) {
@@ -170,11 +171,13 @@ async function routes(fastify, options) {
           start = teamData.start;
           ended = Date.now() - teamData.start < 10800000;
         }
+        teamcode = teamData.code;
       }
       reply.send({
         user: req.user,
         profile: data.profile,
         team: team,
+        teamcode: teamcode,
         competitionStart: Date.now() >= 1595160000000,
         started: start,
         ended: ended,
@@ -204,7 +207,7 @@ async function routes(fastify, options) {
 
       var data = await c.findOne({ id: req.user.id });
 
-      // TODO: Add team member IDs to team document
+      // TODO: Remove team member when they had a team before
       // if(data.team) {
       //   let prevTeam = cTeams.findOne({ id: data.team });
       //
@@ -214,6 +217,12 @@ async function routes(fastify, options) {
         { id: req.user.id },
         { $set: { team: team.id, teamname: team.teamname } }
       );
+
+      let members = team.members;
+      if (!members) members = [];
+      members.push(req.user.id);
+
+      await cTeams.updateOne({ id: team.id }, { $set: { members: members } });
 
       reply.send({ success: true, team: team.teamname });
     }

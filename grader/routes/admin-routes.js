@@ -335,9 +335,10 @@ async function run(files, status, problem, total, results, i) {
 
 async function routes(fastify, options) {
   // const db = fastify.mongo.client.db("globalmind");
-  // const cUser = db.collection("users");
   const db = fastify.mongo.client.db("taugrad");
   const cScores = db.collection("scores");
+  const cUsers = db.collection("users");
+  const cTeams = db.collection("teams");
 
   fastify.post(
     "/grade",
@@ -409,6 +410,86 @@ async function routes(fastify, options) {
         success: true,
       });
       return;
+    }
+  );
+
+  fastify.post(
+    "/genTeams",
+    { preValidation: [fastify.authenticate] },
+    async (req, reply) => {
+      if (req.user.id !== 1) {
+        reply.code(401);
+      }
+
+      if (!req.body) {
+        reply.code(422).send(new Error("Missing parameters"));
+      }
+
+      let code =
+        Math.random().toString(36).substring(2, 15) +
+        Math.random().toString(36).substring(2, 15);
+
+      while (await cTeams.findOne({ code })) {
+        code =
+          Math.random().toString(36).substring(2, 15) +
+          Math.random().toString(36).substring(2, 15);
+      }
+
+      let found = false;
+      let user = null;
+
+      if (req.body.id) {
+        let data = await cUsers.findOne({ id: req.body.id });
+        if (data) {
+          found = true;
+          user = data;
+        }
+      }
+
+      if (!found && req.body.email) {
+        let data = await cUsers.findOne({ email: req.body.email });
+        if (data) {
+          found = true;
+          user = data;
+        }
+      }
+
+      if (!found) {
+        reply.code(404).send({ found: false });
+        return;
+      }
+
+      if (user.team) {
+        reply.code(404).send({ found: true, hasTeam: true });
+        return;
+      }
+
+      if (await cTeams.findOne({ teamname: req.body.name })) {
+        reply.code(404).send({ found: true, hasTeam: false, teamExists: true });
+        return;
+      }
+
+      let metadata = await cTeams.findOne({ specificUse: "databaseInfo" });
+      let teamId = metadata.teamId + 1;
+
+      cTeams.updateOne(metadata, { $set: { teamId: teamId } });
+
+      await cTeams.insertOne({
+        id: teamId,
+        code: code,
+        teamname: req.body.name,
+      });
+
+      await cUsers.updateOne(user, {
+        $set: { team: teamId, teamname: req.body.name },
+      });
+
+      let members = [];
+      members.push(user.id);
+
+      await cTeams.updateOne({ id: teamId }, { $set: { members: members } });
+
+      reply.send({ found: true, hasTeam: false, code });
     }
   );
 }

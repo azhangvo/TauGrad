@@ -472,7 +472,10 @@ async function routes(fastify, options) {
 
       let cu = await cUsers.findOne({ id: req.user.id });
 
-      // TODO: Last submission
+      await cUsers.updateOne(
+        { id: req.user.id },
+        { $set: { lastSubmission: Date.now() } }
+      );
 
       if (problemInfo[req.body.problem][req.user.id]) {
         fs.unlink(

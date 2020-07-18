@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { ToastsStore } from "react-toasts";
-import Select from "react-select";
 
 import API from "./API.js";
 
@@ -65,12 +64,16 @@ class Profile extends Component {
         return;
       }
 
-      if(document.getElementsByName("username")[0].value.length !== 0 &&
-      document.getElementsByName("username")[0].value !==
-        API.info.user.username) {
-          ToastsStore.error("Sorry, but changing your username is not currently supported!")
-          return;
-        }
+      if (
+        document.getElementsByName("username")[0].value.length !== 0 &&
+        document.getElementsByName("username")[0].value !==
+          API.info.user.username
+      ) {
+        ToastsStore.error(
+          "Sorry, but changing your username is not currently supported!"
+        );
+        return;
+      }
 
       API.checkPassword(
         document.getElementsByName("currentPassword")[0].value
@@ -134,7 +137,9 @@ class Profile extends Component {
               required={this.state.changed ? true : false}
             />
             <label id="team">
-              Team - <b>{API.info.team ? API.info.team : "None"}</b>
+              Team - <b>{API.info.team ? API.info.team : "None"}</b>{" "}
+              {API.info.team ? "-" : ""}{" "}
+              <b>{API.info.team ? API.info.teamcode : ""}</b>
             </label>
             <input
               type="text"

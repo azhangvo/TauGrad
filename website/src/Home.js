@@ -60,16 +60,26 @@ class Home extends Component {
                 noctemdevelopment@gmail.com
               </a>
               , message me on Discord at Tau#0001, or join our Discord at{" "}
-              <a href="discord.gg/JU7JCd6">discord.gg/JU7JCd6</a>.
+              <a href="https://discord.gg/JU7JCd6">discord.gg/JU7JCd6</a>.
             </p>
             <p style={{ textAlign: "right" }}>- Arthur Zhang</p>
             <button
               className={styles.interact}
+              style={{ display: API.getLoginStatus() ? "none" : "block" }}
               button
               type="submit"
               onClick={() => this.props.tm.current.load("/login")}
             >
               Login
+            </button>
+            <button
+              className={styles.interact}
+              style={{ display: API.getLoginStatus() ? "block" : "none" }}
+              button
+              type="submit"
+              onClick={() => this.props.tm.current.load("/submit")}
+            >
+              Submit
             </button>
           </div>
         </div>

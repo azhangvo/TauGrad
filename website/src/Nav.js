@@ -94,7 +94,7 @@ class Nav extends Component {
               >
                 <p>Problems</p>
               </button>
-              ;
+
               <button
                 onClick={() => {
                   this.props.tm.current.load("/submit");

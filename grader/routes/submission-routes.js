@@ -404,6 +404,28 @@ async function routes(fastify, options) {
         return;
       }
 
+      if (Date.now() < 1595160000000) {
+        reply.code(400).send(new Error("Competition has not started yet"));
+        return;
+      }
+
+      let cu = await cUsers.findOne({ id: req.user.id });
+      if (!cu.team) {
+        reply.code(400).send(new Error("You are not in a team!"));
+        return;
+      }
+
+      let teamData = await cTeams.findOne({ id: cu.team });
+      if (!teamData.start) {
+        reply.code(400).send(new Error("Time has not started yet"));
+        return;
+      }
+
+      if (Date.now() - teamData.start >= 10800000) {
+        reply.code(400).send(new Error("Your time is up!"));
+        return;
+      }
+
       if (
         !req.body ||
         !req.body.submission ||
@@ -469,8 +491,6 @@ async function routes(fastify, options) {
       if (!languages.includes(type)) {
         reply.code(409).send(new Error("Language not found or supported"));
       }
-
-      let cu = await cUsers.findOne({ id: req.user.id });
 
       await cUsers.updateOne(
         { id: req.user.id },
@@ -556,14 +576,35 @@ async function routes(fastify, options) {
     }
   );
 
-  fastify.get("/problems", async (req, reply) => {
-    reply.send({
-      problems: problems.slice(
-        regulations.problemAccess[0] - 1,
-        regulations.problemAccess[1]
-      ),
-    });
-  });
+  fastify.get(
+    "/problems",
+    { preValidation: [fastify.authenticate] },
+    async (req, reply) => {
+      let cu = await cUsers.findOne({ id: req.user.id });
+      if (!cu.team) {
+        reply.code(400).send(new Error("You are not in a team!"));
+        return;
+      }
+
+      let teamData = await cTeams.findOne({ id: cu.team });
+      if (!teamData.start) {
+        reply.code(400).send(new Error("Time has not started yet"));
+        return;
+      }
+
+      if (Date.now() - teamData.start >= 10800000) {
+        reply.code(400).send(new Error("Your time is up!"));
+        return;
+      }
+
+      reply.send({
+        problems: problems.slice(
+          regulations.problemAccess[0] - 1,
+          regulations.problemAccess[1]
+        ),
+      });
+    }
+  );
 
   fastify.get(
     "/writtenProblems",

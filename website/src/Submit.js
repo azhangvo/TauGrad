@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { ToastsStore } from "react-toasts";
 import Select from "react-select";
+import Countdown from "react-countdown";
 
 import StartTimer from "./StartTimer.js";
 import CompetitionNotStarted from "./CompetitionNotStarted.js";
@@ -39,6 +40,7 @@ class Submit extends Component {
   }
   duplicateForSelect(arr) {
     let newArr = [];
+    if (!arr) return newArr;
     arr.forEach((problem) => {
       newArr.push({ label: problem, value: problem });
     });
@@ -77,6 +79,7 @@ class Submit extends Component {
         this.state.language.value,
         this.state.problem.value
       ).then((success) => {
+        this.setState({ submitted: false });
         if (success) {
           this.setState({ language: null, problem: null });
           document.getElementById("input").value = "";
@@ -102,12 +105,13 @@ class Submit extends Component {
   }
 
   CheckTimer() {
-    if (!API.getLoginStatus() && !API.startCompetition) {
+    if (!API.getLoginStatus()) {
+      this.props.tm.current.load("/home");
+      return null;
+    }
+    if (!API.info.competitionStart) {
       return <CompetitionNotStarted />;
-    } else if (
-      (API.started && !API.ended) ||
-      (API.getLoginStatus() && !API.startCompetition)
-    ) {
+    } else if (API.started && !API.ended) {
       return (
         <div className={styles.container}>
           <div
@@ -116,7 +120,7 @@ class Submit extends Component {
               display: API.getLoginStatus() && API.info.user ? "block" : "none",
             }}
           >
-            <h1 style={{ fontSize: "36px" }}>Submission</h1>
+            <this.CountdownComponent />
             <p style={{ fontSize: "24px" }}>
               Submit your code here. Click the button to choose a file, then
               select your language, and also select the problem you are
@@ -199,10 +203,38 @@ class Submit extends Component {
         </div>
       );
     } else if (!API.started) {
-      return <StartTimer />;
+      return <StartTimer tm={this.props.tm} />;
     } else if (API.ended) {
       return <CompetitionEnded />;
     }
+    return <></>;
+  }
+
+  CountdownComponent() {
+    if (API.started && !API.ended) {
+      return (
+        <div className={styles.countdownContainer}>
+          <h1 className={styles.title} style={{ fontSize: "36px" }}>
+            Submission
+          </h1>
+          <div className={styles.countdown}>
+            <Countdown
+              date={API.started + 10800000}
+              intervalDelay={0}
+              precision={3}
+              onComplete={() => API.retrieveInfo()}
+            />
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div className={styles.countdownContainer}>
+        <h1 className={styles.title} style={{ fontSize: "36px" }}>
+          Submission
+        </h1>
+      </div>
+    );
   }
 }
 

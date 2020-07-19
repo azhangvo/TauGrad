@@ -1,5 +1,3 @@
-import React from "react";
-
 import { ToastsStore } from "react-toasts";
 
 var token = "";
@@ -138,6 +136,9 @@ class API {
     return new Promise((resolve, reject) => {
       fetch("/api/problems", {
         method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }).then(
         (resp) => {
           if (resp.status === 200) {
@@ -146,7 +147,7 @@ class API {
             });
           } else {
             resp.json().then((resp) => {
-              ToastsStore.error(resp.message, 10000);
+              ToastsStore.error(resp.message);
               resolve(false);
             });
           }
@@ -267,7 +268,11 @@ class API {
       (resp) => {
         if (resp.status === 200) {
           resp.json().then((resp) => {
-            ToastsStore.success("Welcome, " + resp.username + "! Head over to the submission page to do some testing before the competition!", 20000); // TODO: Remove testing message
+            ToastsStore.success(
+              "Welcome, " +
+                resp.username +
+                "!"
+            );
             token = resp.token;
             if (remember) {
               localStorage.setItem("token", token);

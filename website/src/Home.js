@@ -38,8 +38,8 @@ class Home extends Component {
               {" "}
               Welcome! This website has been developed by Arthur Zhang (
               <a href="https://www.arthurzhang.me">www.arthurzhang.me</a>{" "}
-              (website is still in progress)), and is currently being used for{" "}
-              <b>Noctem Virtual!</b>
+              (website is still in progress)), and Charlotte Wang, and is
+              currently being used for <b>Noctem Virtual!</b>
             </p>
             <p>
               Please take a moment to familarize yourself with the site. You'll
@@ -66,7 +66,6 @@ class Home extends Component {
             <button
               className={styles.interact}
               style={{ display: API.getLoginStatus() ? "none" : "block" }}
-              button
               type="submit"
               onClick={() => this.props.tm.current.load("/login")}
             >
@@ -75,7 +74,6 @@ class Home extends Component {
             <button
               className={styles.interact}
               style={{ display: API.getLoginStatus() ? "block" : "none" }}
-              button
               type="submit"
               onClick={() => this.props.tm.current.load("/submit")}
             >

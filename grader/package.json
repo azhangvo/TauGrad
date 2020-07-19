@@ -12,6 +12,7 @@
     "fastify-mongodb": "^2.0.0",
     "fastify-multipart": "^1.0.4",
     "fastify-static": "^2.5.1",
+    "nodemailer": "^6.4.10",
     "pump": "^3.0.0",
     "request": "^2.88.0",
     "requests": "^0.3.0"

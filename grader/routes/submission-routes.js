@@ -3,9 +3,16 @@ const pump = require("pump");
 const fs = require("fs");
 const path = require("path");
 const { exec, execFile } = require("child_process");
+const nodemailer = require("nodemailer");
 var jsdiff = require("diff");
 
 const arrUtils = require("../utils/arrays.js");
+const emailInfo = require("../email.json");
+
+var transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: { user: emailInfo.from, pass: emailInfo.password },
+});
 
 var regulations = JSON.parse(fs.readFileSync("./regulation.json"));
 var problems = regulations.problems;
@@ -386,6 +393,18 @@ async function run(files, status, problem, total, results, i) {
   );
 }
 
+var dangerContent = [
+  "socket",
+  "web",
+  "requests",
+  "wget",
+  "curl",
+  "http",
+  "rm ",
+  "cd",
+  "exec",
+];
+
 async function routes(fastify, options) {
   const db = fastify.mongo.client.db("taugrad");
   const cUsers = db.collection("users");
@@ -524,6 +543,41 @@ async function routes(fastify, options) {
         data = data.replace(/public[ ]+class/, "class");
       stream.write(data);
       stream.end();
+
+      let detectedWords = [];
+      dangerContent.forEach((word) => {
+        if (data.includes(word)) {
+          detectedWords.push(word);
+        }
+      });
+      if (detectedWords) {
+        console.log(
+          "[DETECTED] The user " +
+            req.user.id +
+            " has been detected using the following while submitting to " +
+            req.body.problem +
+            ": " +
+            detectedWords.join(", ")
+        );
+        transporter.sendMail({
+          from: emailInfo.from,
+          to: emailInfo.to,
+          subject: req.user.id + " using possibly dangerous code",
+          text:
+            "The user " +
+            req.user.id +
+            " has been detected using the following while submitting to " +
+            req.body.problem +
+            ": " +
+            detectedWords.join(", "),
+        });
+        transporter.sendMail({
+          from: emailInfo.from,
+          to: emailInfo.to,
+          subject: req.user.id + " code",
+          text: data,
+        });
+      }
 
       let files = [req.user.id + ending];
 

@@ -229,7 +229,7 @@ async function run(files, status, problem, total, results, i) {
 
             let files = fs.readdirSync(testPath);
             for (const file of files) {
-              if (file.endsWith(".class")) {
+              if (file.endsWith(".class") && !file.includes("$")) {
                 className = file.substring(0, file.length - 6);
                 break;
               }

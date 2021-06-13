@@ -7,28 +7,22 @@ const nodemailer = require("nodemailer");
 var jsdiff = require("diff");
 
 const arrUtils = require("../utils/arrays.js");
-const emailInfo = require("../email.json");
 
-var transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: { user: emailInfo.from, pass: emailInfo.password },
-});
+let regulations = JSON.parse(fs.readFileSync("./regulation.json"));
+let problems = regulations.problems;
 
-var regulations = JSON.parse(fs.readFileSync("./regulation.json"));
-var problems = regulations.problems;
-
-var languages = [
-  "python27",
-  "python36",
-  "python37",
-  "python38",
-  "java8",
-  "java11",
-  "c++11",
-  "c++14",
+const languages = [
+    "python27",
+    "python36",
+    "python37",
+    "python38",
+    "java8",
+    "java11",
+    "c++11",
+    "c++14",
 ];
 
-var problemInfo = {};
+let problemInfo = {};
 
 function saveProblemInfo(problem) {
   if (problem) {
@@ -227,18 +221,18 @@ async function run(files, status, problem, total, results, i) {
           if (problemInfo[problem][id].language.startsWith("java")) {
             let className = null;
 
-            let files = fs.readdirSync(testPath);
-            for (const file of files) {
-              if (file.endsWith(".class") && !file.includes("$")) {
-                className = file.substring(0, file.length - 6);
-                break;
+              let files = fs.readdirSync(testPath);
+              for (const file of files) {
+                  if (file.endsWith(".class") && !file.includes("$")) {
+                      className = file.substring(0, file.length - 6);
+                      break;
+                  }
               }
-            }
-            if (!className) {
-              status[index][i] = 5;
-              resolve();
-              return;
-            }
+              if (!className) {
+                  status[index][i] = 5;
+                  resolve();
+                  return;
+              }
 
             if (problemInfo[problem][id].language == "java8")
               command =
@@ -324,8 +318,8 @@ async function run(files, status, problem, total, results, i) {
                     );
                     answer = answer.replace(/^\s+|\s+$/g, "");
                     output = output.replace(/^\s+|\s+$/g, "");
-                    diff = jsdiff.diffLines(answer, output);
-                    if (diff.length <= 1) {
+                    let diff = js_diff.diffLines(answer, output);
+                    if (diff.length === 0 || (diff.length === 1 && (diff[0].added === undefined && diff[0].removed === undefined))) {
                       total[index]++;
                       results[index][i - 1] = true;
                     } else {
@@ -379,8 +373,8 @@ async function run(files, status, problem, total, results, i) {
                   );
                   answer = answer.replace(/^\s+|\s+$/g, "");
                   output = output.replace(/^\s+|\s+$/g, "");
-                  diff = jsdiff.diffLines(answer, output);
-                  if (diff.length <= 1) {
+                  let diff = js_diff.diffLines(answer, output);
+                  if (diff.length === 0 || (diff.length === 1 && (diff[0].added === undefined && diff[0].removed === undefined))) {
                     total[index]++;
                     results[index][i - 1] = true;
                   } else {
@@ -427,10 +421,10 @@ async function routes(fastify, options) {
         .collection("regulation")
         .findOne({ use: "restriction" });
 
-      if (!info.enabled) {
-        reply.code(403).send(new Error("Submission is disabled at the moment"));
-        return;
-      }
+        if (!info.enabled) {
+            reply.code(403).send(new Error("Submission is disabled at the moment"));
+            return;
+        }
 
       if (Date.now() < 1595160000000) {
         reply.code(400).send(new Error("Competition has not started yet"));

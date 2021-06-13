@@ -120,6 +120,7 @@ async function routes(fastify, options) {
     reply.send({ token: token, username: user.username });
     return;
   });
+
   fastify.post(
     "/check",
     { preValidation: [fastify.authenticate] },
@@ -254,6 +255,16 @@ async function routes(fastify, options) {
           .send(
             new Error(
               "The contest has not started yet! It starts on July 19th at 8:00AM Eastern."
+            )
+          );
+      }
+
+      if (Date.now() > 1595808000000) {
+        reply
+          .code(400)
+          .send(
+            new Error(
+              "The contest is over! You can no longer start the competition."
             )
           );
       }

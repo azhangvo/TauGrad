@@ -122,13 +122,13 @@ async function compile(files, problem, status) {
             "g++ -std=c++17 -o " + id + "/" + truncFile + " " + filename;
         if (problemInfo[problem][id].language == "java8")
           compileCommand =
-            "update-alternatives --set javac /usr/lib/jvm/java-8-openjdk-amd64/bin/javac && javac -d " +
+            "sudo update-alternatives --set javac /usr/lib/jvm/java-8-openjdk-amd64/bin/javac && javac -d " +
             id +
             " " +
             filename;
         if (problemInfo[problem][id].language == "java11")
           compileCommand =
-            "update-alternatives --set javac /usr/lib/jvm/java-11-oracle/bin/javac && javac -d " +
+            "sudo update-alternatives --set javac /usr/lib/jvm/java-11-oracle/bin/javac && javac -d " +
             id +
             " " +
             filename;
@@ -242,11 +242,11 @@ async function run(files, status, problem, total, results, i) {
 
             if (problemInfo[problem][id].language == "java8")
               command =
-                "update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java && java " +
+                "sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java && java " +
                 className;
             if (problemInfo[problem][id].language == "java11")
               command =
-                "update-alternatives --set java /usr/lib/jvm/java-11-oracle/bin/java && java " +
+                "sudo update-alternatives --set java /usr/lib/jvm/java-11-oracle/bin/java && java " +
                 className;
           }
 
@@ -254,9 +254,9 @@ async function run(files, status, problem, total, results, i) {
             fs.unlinkSync(testPath + "/" + problem + ".out");
           startTime[index] = Date.now();
           if (problemInfo[problem][id].language.startsWith("java")) {
-            exec(
+            let process = exec(
               command,
-              { timeout: 7000, cwd: testPath },
+              { timeout: 9000, cwd: testPath },
               (error, stdout, stderr) => {
                 if (error) {
                   if (Date.now() - startTime[index] <= 5000) {
@@ -294,10 +294,13 @@ async function run(files, status, problem, total, results, i) {
                 resolve();
               }
             );
+            setTimeout(() => {
+              if (!process.killed) exec("pkill -TERM -P " + process.pid);
+            }, 7000);
           } else {
-            execFile(
+            let process = execFile(
               command,
-              { timeout: 7000, cwd: testPath + "/" },
+              { timeout: 9000, cwd: testPath + "/" },
               (error, stdout, stderr) => {
                 if (error) {
                   if (Date.now() - startTime[index] <= 5000) {
@@ -335,6 +338,9 @@ async function run(files, status, problem, total, results, i) {
                 resolve();
               }
             );
+            setTimeout(() => {
+              if (!process.killed) exec("pkill -TERM -P " + process.pid);
+            }, 7000);
           }
         } else {
           if (problemInfo[problem][id].language == "python27")
@@ -347,9 +353,9 @@ async function run(files, status, problem, total, results, i) {
             command = "python3.8 " + filename;
           startTime[index] = Date.now();
 
-          exec(
+          let process = exec(
             command,
-            { timeout: 7000, cwd: testPath },
+            { timeout: 9000, cwd: testPath },
             (error, stdout, stderr) => {
               if (error) {
                 if (Date.now() - startTime[index] <= 5000) {
@@ -387,6 +393,9 @@ async function run(files, status, problem, total, results, i) {
               resolve();
             }
           );
+          setTimeout(() => {
+            if (!process.killed) exec("pkill -TERM -P " + process.pid);
+          }, 7000);
         }
       });
     })
@@ -401,7 +410,7 @@ var dangerContent = [
   "curl",
   "http",
   "rm ",
-  "cd",
+  "cd ",
   "exec",
 ];
 
@@ -539,8 +548,10 @@ async function routes(fastify, options) {
         "./data/" + req.body.problem + "/" + req.user.id + ending
       );
       let data = s.data.toString();
-      if (type.startsWith("java"))
+      if (type.startsWith("java")) {
         data = data.replace(/public[ ]+class/, "class");
+        data = data.replace(/package[ ]+[a-zA-Z0-9_\-.]/, "");
+      }
       stream.write(data);
       stream.end();
 
@@ -550,7 +561,7 @@ async function routes(fastify, options) {
           detectedWords.push(word);
         }
       });
-      if (detectedWords) {
+      if (detectedWords.length > 0) {
         console.log(
           "[DETECTED] The user " +
             req.user.id +
@@ -626,7 +637,74 @@ async function routes(fastify, options) {
         results: results[0],
       });
 
+      await cUsers.updateOne(
+        { id: req.user.id },
+        {
+          $set: {
+            [req.body.problem]: {
+              status: status[0],
+              total: total[0],
+              results: results[0],
+            },
+          },
+        }
+      );
+
       return;
+    }
+  );
+
+  fastify.get(
+    "/teamScores",
+    { preValidation: [fastify.authenticate] },
+    async (req, reply) => {
+      let cu = await cUsers.findOne({ id: req.user.id });
+      if (!cu.team) {
+        reply.code(400).send(new Error("You are not in a team!"));
+        return;
+      }
+
+      let teamData = await cTeams.findOne({ id: cu.team });
+      if (!teamData.start) {
+        reply.code(400).send(new Error("Time has not started yet"));
+        return;
+      }
+
+      if (Date.now() - teamData.start >= 10800000) {
+        reply.code(400).send(new Error("Your time is up!"));
+        return;
+      }
+
+      let members = teamData.members;
+      if (!members) {
+        reply
+          .code(400)
+          .send(new Error("Your team doesn't have members...? What??"));
+        return;
+      }
+
+      let scores = [];
+      let toCheck = problems.slice(
+        regulations.problemAccess[0] - 1,
+        regulations.problemAccess[1]
+      );
+      await Promise.all(
+        Object.keys(members).map(async (i) => {
+          let member = members[i];
+          let memberData = await cUsers.findOne({ id: member });
+          let memberScores = { username: memberData.username };
+          for (let i = 0; i < toCheck.length; i++) {
+            if (toCheck[i] in memberData) {
+              memberScores[toCheck[i]] = memberData[toCheck[i]];
+            } else {
+              memberScores[toCheck[i]] = "Missing";
+            }
+          }
+          scores.push(memberScores);
+        })
+      );
+
+      reply.send({ success: true, scores });
     }
   );
 

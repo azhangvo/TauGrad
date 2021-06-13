@@ -19,6 +19,7 @@ class API {
   static getLoginStatus() {
     return token !== "";
   }
+
   static checkRemember() {
     if (
       localStorage.getItem("token") &&
@@ -28,6 +29,7 @@ class API {
       this.retrieveInfo();
     }
   }
+
   static retrieveInfo() {
     return new Promise((resolve, reject) => {
       fetch("/api/user", {
@@ -70,6 +72,7 @@ class API {
       );
     });
   }
+
   static updateInfo(changes) {
     return new Promise((resolve, reject) => {
       if (changes.team) {
@@ -106,12 +109,15 @@ class API {
       }
     });
   }
+
   static waitUpdate(component) {
     waitingComponents.push(component);
   }
+
   static getInfo() {
     return this.info;
   }
+
   static startTime() {
     return new Promise((resolve, reject) => {
       fetch("/api/startTime", {
@@ -132,6 +138,7 @@ class API {
       });
     });
   }
+
   static getProblems() {
     return new Promise((resolve, reject) => {
       fetch("/api/problems", {
@@ -158,6 +165,7 @@ class API {
       );
     });
   }
+
   static getWrittenProblems() {
     return new Promise((resolve, reject) => {
       fetch("/api/writtenProblems", {
@@ -184,6 +192,7 @@ class API {
       );
     });
   }
+
   static submit(file, language, problem) {
     return new Promise((resolve, reject) => {
       let form = new FormData();
@@ -223,6 +232,32 @@ class API {
       );
     });
   }
+
+  static getTeamResults() {
+    return new Promise((resolve, reject) => {
+      fetch("/api/teamScores", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }).then((resp) => {
+        if (resp.status === 200) {
+          resp.json().then((resp) => {
+            resolve(resp.scores);
+            waitingComponents.forEach((component) => {
+              component.forceUpdate();
+            });
+          });
+        } else {
+          resp.json().then((resp) => {
+            ToastsStore.error(resp.message, 10000);
+            resolve(false);
+          });
+        }
+      });
+    });
+  }
+
   static checkPassword(password) {
     return new Promise((resolve, reject) => {
       fetch("/api/check", {
@@ -268,11 +303,7 @@ class API {
       (resp) => {
         if (resp.status === 200) {
           resp.json().then((resp) => {
-            ToastsStore.success(
-              "Welcome, " +
-                resp.username +
-                "!"
-            );
+            ToastsStore.success("Welcome, " + resp.username + "!");
             token = resp.token;
             if (remember) {
               localStorage.setItem("token", token);
@@ -291,6 +322,7 @@ class API {
       }
     );
   }
+
   static register(email, username, password, remember, tm) {
     fetch("/api/register", {
       method: "POST",
@@ -324,6 +356,7 @@ class API {
       }
     );
   }
+
   static logout(all, tm) {
     localStorage.removeItem("token");
     this.info = {};
@@ -350,6 +383,7 @@ class API {
     );
     token = "";
   }
+
   static startTimer(code) {
     return new Promise((resolve, reject) => {
       fetch("/api/starttime", {

@@ -9,6 +9,7 @@ import Home from "./Home.js";
 import Problems from "./Problems.js"
 import Submit from "./Submit.js";
 import Results from "./Results.js";
+import TeamResults from "./TeamResults.js";
 import Profile from "./Profile.js";
 import Login from "./Login.js";
 import Register from "./Register.js";
@@ -52,12 +53,13 @@ class App extends Component {
         <div>
           <Nav tm={this.tm} location={document.location.href} />
           <Switch>
-            <Route path="/" exact component={() => <Home tm={this.tm} />} />
-            <Route path="/problems" component={() => <Problems tm={this.tm} />} />
-            <Route path="/submit" component={() => <Submit tm={this.tm} />} />
-            <Route path="/results" component={() => <Results tm={this.tm} />} />
-            <Route path="/profile" component={() => <Profile tm={this.tm} />} />
-            <Route path="/login" component={() => <Login tm={this.tm} />} />
+            <Route path="/" exact render={(props) => <Home {...props} tm={this.tm} />} />
+            <Route path="/problems" render={(props) => <Problems {...props} tm={this.tm} />} />
+            <Route path="/submit" render={(props) => <Submit {...props} tm={this.tm} />} />
+            <Route path="/results" render={(props) => <Results {...props} tm={this.tm} />} />
+            <Route path="/teamresults" render={(props) => <TeamResults {...props} tm={this.tm} />} />
+            <Route path="/profile" render={(props) => <Profile {...props} tm={this.tm} />} />
+            <Route path="/login" render={(props) => <Login {...props} tm={this.tm} />} />
             <Route
               path="/register"
               component={() => <Register tm={this.tm} />}

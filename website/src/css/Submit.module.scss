@@ -68,6 +68,15 @@
         }
       }
     }
+    .countdownContainer {
+      display: flex;
+      justify-content: space-between;
+      .countdown {
+        font-size: 30px;
+        display: flex;
+        align-items: center;
+      }
+    }
   }
 }
 

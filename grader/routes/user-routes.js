@@ -120,6 +120,7 @@ async function routes(fastify, options) {
     reply.send({ token: token, username: user.username });
     return;
   });
+
   fastify.post(
     "/check",
     { preValidation: [fastify.authenticate] },
@@ -155,6 +156,8 @@ async function routes(fastify, options) {
     }
   );
 
+  let millisSinceEpoch = new Date(2020, 6, 19, 8).getTime();
+
   fastify.get(
     "/user",
     { preValidation: [fastify.authenticate] },
@@ -168,8 +171,9 @@ async function routes(fastify, options) {
         team = data.teamname;
         var teamData = await cTeams.findOne({ id: data.team });
         if (Date.now() >= 1595160000000) {
+          // 1095160000000
           start = teamData.start;
-          ended = Date.now() - teamData.start < 10800000;
+          ended = Date.now() - teamData.start > 10800000;
         }
         teamcode = teamData.code;
       }
@@ -178,7 +182,7 @@ async function routes(fastify, options) {
         profile: data.profile,
         team: team,
         teamcode: teamcode,
-        competitionStart: Date.now() >= 1595160000000,
+        competitionStart: Date.now() >= 1595160000000, // 1595160000000
         started: start,
         ended: ended,
       });
@@ -207,11 +211,18 @@ async function routes(fastify, options) {
 
       var data = await c.findOne({ id: req.user.id });
 
-      // TODO: Remove team member when they had a team before
-      // if(data.team) {
-      //   let prevTeam = cTeams.findOne({ id: data.team });
-      //
-      // }
+      if (data.team) {
+        if (data.team == team.id) {
+          reply.code(400).send(new Error("You're already in that team!"));
+          return;
+        }
+        let prevTeam = cTeams.findOne({ id: data.team });
+        let members = prevTeam.members;
+        members = members.filter((value, index, arr) => {
+          return value != req.user.id;
+        });
+        await cTeams.updateOne(prevTeam, { $set: { members } });
+      }
 
       await c.updateOne(
         { id: req.user.id },
@@ -248,7 +259,23 @@ async function routes(fastify, options) {
           );
       }
 
+      if (Date.now() > 1595808000000) {
+        reply
+          .code(400)
+          .send(
+            new Error(
+              "The contest is over! You can no longer start the competition."
+            )
+          );
+      }
+
       var teamData = await cTeams.findOne({ id: data.team });
+
+      if (!teamData) {
+        reply.code(400).send(new Error("Team not found"));
+        return;
+      }
+
       if (teamData.start) {
         reply.code(400).send(new Error("Time has already started"));
         return;

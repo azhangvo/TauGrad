@@ -7,3 +7,5 @@ grader/data
 grader/tests
 grader/static/build
 grader-pre-nv
+devGrader
+grader/email.json

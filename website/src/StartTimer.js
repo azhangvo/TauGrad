@@ -41,7 +41,15 @@ class StartTimer extends Component {
         >
           <div>
             <h3>Are you sure you want to start?</h3>
-            <button type="submit" onClick={() => API.startTime()}>
+            <button
+              type="submit"
+              onClick={() => {
+                API.startTime().then(() => {
+                  API.retrieveInfo()
+                  this.props.tm.current.load("/submit");
+                })
+              }}
+            >
               Start
             </button>
             <button

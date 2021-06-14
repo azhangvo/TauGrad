@@ -64,11 +64,16 @@ class Results extends Component {
         <h5 style={{ textAlign: "right" }}>{scores.username}</h5>
       </div>
     );
-    for (var problem in scores) {
+    for (let problem in scores) {
       if (problem === "username") continue;
+      if(!scores.hasOwnProperty(problem)) {
+        console.log(`Missing property ${problem}`)
+        continue;
+      }
+      console.log(`${scores.username} | ${problem} | ${scores[problem] === "Missing"} | ${scores[problem]["status"] && scores[problem]["status"]}`)
       if (scores[problem] === "Missing") {
         problemCols.push(<div className={styles.problem}>x</div>);
-      } else if (scores[problem]["status"][0] === 4) {
+      } else if (scores[problem]["status"] && scores[problem]["status"][0] === 4) {
         problemCols.push(
           <div className={styles.problem}>
             <h3 style={{ margin: 0 }}> Compile Error </h3>
@@ -87,11 +92,12 @@ class Results extends Component {
   }
 
   ResultsTable(props) {
+    let i;
     let scores = props.scores;
     console.log(scores);
-    var rows1 = [];
-    var rows2 = [];
-    for (var i = 0; i < 5; i++) {
+    let rows1 = [];
+    let rows2 = [];
+    for (i = 0; i < 5; i++) {
       if (scores.status[i + 1] === 5) {
         rows1.push(
           <div className={styles.statusContainer}>
@@ -120,7 +126,7 @@ class Results extends Component {
         }
       }
     }
-    for (var i = 5; i < 10; i++) {
+    for (i = 5; i < 10; i++) {
       if (scores.status[i + 1] === 5) {
         rows2.push(
           <div className={styles.statusContainer}>

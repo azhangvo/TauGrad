@@ -4,9 +4,15 @@ const fs = require("fs");
 const path = require("path");
 const { exec, execFile } = require("child_process");
 const nodemailer = require("nodemailer");
-var jsdiff = require("diff");
+const jsdiff = require("diff");
 
 const arrUtils = require("../utils/arrays.js");
+const emailInfo = require("../email.json");
+
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {user: emailInfo.from, pass: emailInfo.password},
+});
 
 let regulations = JSON.parse(fs.readFileSync("./regulation.json"));
 let problems = regulations.problems;
@@ -274,8 +280,8 @@ async function run(files, status, problem, total, results, i) {
                     );
                     answer = answer.replace(/^\s+|\s+$/g, "");
                     output = output.replace(/^\s+|\s+$/g, "");
-                    diff = jsdiff.diffLines(answer, output);
-                    if (diff.length <= 1) {
+                    let diff = jsdiff.diffLines(answer, output);
+                    if (diff.length === 0 || (diff.length === 1 && (diff[0].added === undefined && diff[0].removed === undefined))) {
                       total[index]++;
                       results[index][i - 1] = true;
                     } else {
@@ -688,7 +694,7 @@ async function routes(fastify, options) {
           let memberData = await cUsers.findOne({ id: member });
           let memberScores = { username: memberData.username };
           for (let i = 0; i < toCheck.length; i++) {
-            if (toCheck[i] in memberData) {
+            if (toCheck[i] in memberData && memberData[toCheck[i]].status !== null && memberData[toCheck[i]].total !== null && memberData[toCheck[i]].results !== null) {
               memberScores[toCheck[i]] = memberData[toCheck[i]];
             } else {
               memberScores[toCheck[i]] = "Missing";

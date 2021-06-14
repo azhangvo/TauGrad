@@ -9,3 +9,5 @@ grader/static/build
 grader-pre-nv
 devGrader
 grader/email.json
+.idea
+package-lock.json

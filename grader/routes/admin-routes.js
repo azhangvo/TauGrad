@@ -201,15 +201,15 @@ async function run(files, status, problem, total, results, i) {
               (error, stdout, stderr) => {
                 if (error) {
                   if (Date.now() - startTime[index] <= 5000) {
-                    status[index][i] = 5;
+                    status[index][i] = 5; // Error within time
                   } else {
-                    status[index][i] = 3;
+                    status[index][i] = 3; // Timeout with error
                   }
                   resolve();
                   return;
                 }
                 if (Date.now() - startTime[index] <= 5000) {
-                  status[index][i] = 2;
+                  status[index][i] = 2; // Finished within time
                   if (fs.existsSync(testPath + "/" + problem + ".out")) {
                     let answer = fs.readFileSync(
                       "./tests/" + problem + "/test" + i + ".out",
@@ -230,7 +230,7 @@ async function run(files, status, problem, total, results, i) {
                     }
                   }
                 } else {
-                  status[index][i] = 3;
+                  status[index][i] = 3; // Timeout error
                 }
                 resolve();
               }

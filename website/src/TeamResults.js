@@ -76,7 +76,7 @@ class Results extends Component {
       } else if (scores[problem]["status"] && scores[problem]["status"][0] === 4) {
         problemCols.push(
           <div className={styles.problem}>
-            <h3 style={{ margin: 0 }}> Compile Error </h3>
+            <h3 style={{ margin: 0 }}> Compilation Error </h3>
           </div>
         );
       } else {
@@ -91,6 +91,36 @@ class Results extends Component {
     return <div className={styles.flexCenter}>{problemCols}</div>;
   }
 
+  addStatus(row, scores, i) {
+      if (scores.status[i + 1] === 5) {
+          row.push(
+              <div className={styles.statusContainer}>
+                  <div className={[styles.statusBox, styles.red, "hint--error", "hint--top"].join(" ")} aria-label={"Runtime error"} />
+              </div>
+          );
+      } else if (scores.status[i + 1] === 3) {
+          row.push(
+              <div className={styles.statusContainer}>
+                  <div className={[styles.statusBox, styles.orange, "hint--warning", "hint--top"].join(" ")} aria-label={"Timeout"} />
+              </div>
+          );
+      } else if (scores.status[i + 1] === 2) {
+          if (scores.results[i]) {
+              row.push(
+                  <div className={styles.statusContainer}>
+                      <div className={[styles.statusBox, styles.green, "hint--success", "hint--top"].join(" ")} aria-label={"Correct answer"} />
+                  </div>
+              );
+          } else {
+              row.push(
+                  <div className={styles.statusContainer}>
+                      <div className={[styles.statusBox, styles.red, "hint--error", "hint--top"].join(" ")} aria-label={"Wrong answer"} />
+                  </div>
+              );
+          }
+      }
+  }
+
   ResultsTable(props) {
     let i;
     let scores = props.scores;
@@ -98,62 +128,10 @@ class Results extends Component {
     let rows1 = [];
     let rows2 = [];
     for (i = 0; i < 5; i++) {
-      if (scores.status[i + 1] === 5) {
-        rows1.push(
-          <div className={styles.statusContainer}>
-            <div className={styles.statusBox + " " + styles.red} />
-          </div>
-        );
-      } else if (scores.status[i + 1] === 3) {
-        rows1.push(
-          <div className={styles.statusContainer}>
-            <div className={styles.statusBox + " " + styles.orange} />
-          </div>
-        );
-      } else if (scores.status[i + 1] === 2) {
-        if (scores.results[i]) {
-          rows1.push(
-            <div className={styles.statusContainer}>
-              <div className={styles.statusBox + " " + styles.green} />
-            </div>
-          );
-        } else {
-          rows1.push(
-            <div className={styles.statusContainer}>
-              <div className={styles.statusBox + " " + styles.red} />
-            </div>
-          );
-        }
-      }
+        this.addStatus(rows1, scores, i)
     }
     for (i = 5; i < 10; i++) {
-      if (scores.status[i + 1] === 5) {
-        rows2.push(
-          <div className={styles.statusContainer}>
-            <div className={styles.statusBox + " " + styles.red} />
-          </div>
-        );
-      } else if (scores.status[i + 1] === 3) {
-        rows2.push(
-          <div className={styles.statusContainer}>
-            <div className={styles.statusBox + " " + styles.orange} />
-          </div>
-        );
-      } else if (scores.status[i + 1] === 2) {
-        if (scores.results[i]) {
-          rows2.push(
-            <div className={styles.statusContainer}>
-              <div className={styles.statusBox + " " + styles.green} />
-            </div>
-          );
-        } else {
-          rows2.push(
-            <div className={styles.statusContainer}>
-              <div className={styles.statusBox + " " + styles.red} />
-            </div>
-          );
-        }
-      }
+        this.addStatus(rows2, scores, i)
     }
     return (
       <>

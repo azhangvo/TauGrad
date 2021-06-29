@@ -491,6 +491,103 @@ async function routes(fastify, options) {
             reply.send({found: true, hasTeam: false, code});
         }
     );
+
+    fastify.get("/getScores", {preValidation: [fastify.authenticate]},
+        async (req, reply) => {
+            if (req.user.id !== 1) {
+                reply.code(401);
+            }
+
+            let teamsCursor = await cTeams.find({totalscore: {$exists: true}});
+
+            let completeScores = {}
+
+            while (await teamsCursor.hasNext()) {
+                const teamData = await teamsCursor.next();
+
+                if (teamData.specificUse)
+                    continue;
+
+                if (!teamData.start) {
+                    console.log(`${teamData.teamname} has not started their timer`)
+                    continue;
+                }
+
+                let members = teamData.members;
+                if (!members) {
+                    console.log(`${teamData.teamname} doesn't have any members...`)
+                    continue;
+                }
+
+                completeScores[teamData.teamname] = {teamscores: teamData.teamscores, totalscore: teamData.totalscore}
+            }
+
+            reply.send(completeScores);
+        })
+
+    fastify.get("/calculateScores", {preValidation: [fastify.authenticate]},
+        async (req, reply) => {
+            if (req.user.id !== 1) {
+                reply.code(401);
+            }
+
+            let teamsCursor = await cTeams.find({start: {$exists: true}});
+
+            let completeScores = {}
+
+            while (await teamsCursor.hasNext()) {
+                const teamData = await teamsCursor.next();
+
+                if (teamData.specificUse)
+                    continue;
+
+                if (!teamData.start) {
+                    console.log(`${teamData.teamname} has not started their timer`)
+                    continue;
+                }
+
+                let members = teamData.members;
+                if (!members) {
+                    console.log(`${teamData.teamname} doesn't have any members...`)
+                    continue;
+                }
+
+                let scores = {};
+                let toCheck = problems.slice(
+                    regulations.problemAccess[0] - 1,
+                    regulations.problemAccess[1]
+                );
+
+                for (const problem of toCheck) {
+                    scores[problem] = 0;
+                }
+
+                await Promise.all(
+                    Object.keys(members).map(async (i) => {
+                        let member = members[i];
+                        let memberData = await cUsers.findOne({id: member});
+                        for (let i = 0; i < toCheck.length; i++) {
+                            if (toCheck[i] in memberData && memberData[toCheck[i]].status !== null && memberData[toCheck[i]].total !== null && memberData[toCheck[i]].results !== null) {
+                                scores[toCheck[i]] = Math.max(scores[toCheck[i]], memberData[toCheck[i]].total)
+                            }
+                        }
+                    })
+                );
+
+                let totalScore = 0;
+                for (const problem in scores)
+                    totalScore += scores[problem]
+
+                completeScores[teamData.teamname] = {teamscores: scores, totalscore: totalScore}
+
+                console.log(`${teamData.teamname}: ${totalScore}`)
+
+                await cTeams.updateOne({id: teamData.id}, {$set: {teamscores: scores, totalscore: totalScore}});
+            }
+
+            reply.send(completeScores);
+        })
 }
+
 
 module.exports = routes;

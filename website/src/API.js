@@ -258,6 +258,31 @@ class API {
     });
   }
 
+  static getLeaderboard() {
+    return new Promise((resolve, reject) => {
+      fetch("/api/leaderboard", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }).then((resp) => {
+        if (resp.status === 200) {
+          resp.json().then((resp) => {
+            resolve(resp);
+            waitingComponents.forEach((component) => {
+              component.forceUpdate();
+            });
+          });
+        } else {
+          resp.json().then((resp) => {
+            ToastsStore.error(resp.message, 10000);
+            resolve(false);
+          });
+        }
+      });
+    });
+  }
+
   static checkPassword(password) {
     return new Promise((resolve, reject) => {
       fetch("/api/check", {

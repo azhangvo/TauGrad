@@ -84,6 +84,32 @@ class Nav extends Component {
               </button>*/}
 
               <button
+                  onClick={() => {
+                    this.props.tm.current.load("/leaderboard");
+                  }}
+                  className={
+                    this.props.tm.current.getLocation() === "/leaderboard"
+                        ? styles.active
+                        : ""
+                  }
+              >
+                <p>Leaderboard</p>
+              </button>
+
+              <button
+                  onClick={() => {
+                    this.props.tm.current.load("/teamresults");
+                  }}
+                  className={
+                    this.props.tm.current.getLocation() === "/teamresults"
+                        ? styles.active
+                        : ""
+                  }
+              >
+                <p>Team Results</p>
+              </button>
+
+              <button
                 onClick={() => {
                   this.props.tm.current.load("/problems");
                 }}
@@ -94,19 +120,6 @@ class Nav extends Component {
                 }
               >
                 <p>Problems</p>
-              </button>
-
-              <button
-                onClick={() => {
-                  this.props.tm.current.load("/teamresults");
-                }}
-                className={
-                  this.props.tm.current.getLocation() === "/teamresults"
-                    ? styles.active
-                    : ""
-                }
-              >
-                <p>Team Results</p>
               </button>
 
               <button

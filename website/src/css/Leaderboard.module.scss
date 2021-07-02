@@ -1,0 +1,73 @@
+@import "Vars";
+
+.container {
+  width: 100vw;
+  @include for-desktop-up {
+    height: calc(100vh - #{$navHeight});
+  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  h3 {
+    font-weight: normal;
+  }
+
+  .flexCenter {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 90vw;
+  }
+}
+
+table {
+  border-collapse: collapse;
+  tr {
+    border-bottom: 1px solid rgba(100, 100, 100, 0.3);
+    th, td {
+      padding: 6px 20px;
+    }
+    th:nth-child(2), td:nth-child(2), th:nth-child(3), td:nth-child(3) {
+      text-align: center;
+    }
+  }
+}
+.statusStatusContainer {
+  display: flex;
+  justify-content: space-around;
+  .statusContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.statusBox {
+  width: 16px;
+  height: 16px;
+  float: left;
+  border-radius: 50%;
+  margin-left: 1px;
+  margin-right: 1px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.red {
+  background-color: #ff0000;
+}
+
+.orange {
+  background-color: #ff8f00;
+}
+
+.green {
+  background-color: #03ff00;
+}
+
+.problem {
+  width: calc(90vw / 11);
+  text-align: center;
+}

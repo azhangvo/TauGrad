@@ -78,6 +78,58 @@ function loadProblemInfo(problem) {
     return true;
 }
 
+let leaderboard = [];
+let ignoredTeams = [1]
+
+async function calculateLeaderboard(cUsers, cTeams) {
+    let teams = await cTeams.find({
+        specificUse: {$exists: false},
+        start: {$exists: true},
+        id: {$nin: ignoredTeams}
+    }).sort({totalscore: -1});
+
+    teams = await teams.toArray();
+
+    await Promise.all(teams.map(async (teamdata, index) => {
+        let latestSubmission = -1;
+        for (const member of teamdata.members) {
+            let memberData = await cUsers.findOne({id: member});
+            if (!memberData || !memberData.hasOwnProperty("lastSubmission"))
+                continue;
+            latestSubmission = Math.max(latestSubmission, memberData.lastSubmission);
+        }
+        if (latestSubmission === -1) {
+            teamdata.submitted = false;
+            return;
+        }
+        teams[index].submitted = true;
+        teams[index].latestSubmission = latestSubmission;
+        teams[index].time = latestSubmission - teams[index].start;
+    }))
+
+    await teams.sort((a, b) => {
+        if (!a.submitted && !b.submitted)
+            return a.start - b.start;
+        if (a.totalscore !== b.totalscore)
+            return b.totalscore - a.totalscore;
+        return a.time - b.time;
+    })
+
+    delete leaderboard;
+    leaderboard = [];
+
+    for (const t of teams) {
+        leaderboard.push({
+            name: t.teamname,
+            score: t.totalscore,
+            time: t.time,
+            hideScore: (t.hideScore ? t.hideScore : false)
+        })
+    }
+
+    setInterval(calculateLeaderboard.bind(null, cUsers, cTeams), 30000);
+}
+
 loadProblemInfo();
 problems = regulations.problems;
 
@@ -419,6 +471,8 @@ async function routes(fastify, options) {
     const cUsers = db.collection("users");
     const cTeams = db.collection("teams");
 
+    calculateLeaderboard(cUsers, cTeams)
+
     fastify.post(
         "/submit",
         {preValidation: [fastify.authenticate]},
@@ -704,6 +758,22 @@ async function routes(fastify, options) {
             );
 
             reply.send({success: true, scores});
+        }
+    );
+
+    fastify.get(
+        "/leaderboard",
+        // {preValidation: [fastify.authenticate]},
+        async (req, reply) => {
+            let teams = leaderboard.slice(0, 10);
+
+            reply.send(teams.map((team) => {
+                let {name, score, time} = team;
+                if (team.hideScore)
+                    return {name}
+                else
+                    return {name, score, time}
+            }))
         }
     );
 

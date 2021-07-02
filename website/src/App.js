@@ -16,6 +16,7 @@ import Register from "./Register.js";
 import Nav from "./Nav.js";
 
 import styles from "./css/App.module.scss";
+import Leaderboard from "./Leaderboard";
 
 class App extends Component {
   constructor(props) {
@@ -54,10 +55,11 @@ class App extends Component {
           <Nav tm={this.tm} location={document.location.href} />
           <Switch>
             <Route path="/" exact render={(props) => <Home {...props} tm={this.tm} />} />
-            <Route path="/problems" render={(props) => <Problems {...props} tm={this.tm} />} />
             <Route path="/submit" render={(props) => <Submit {...props} tm={this.tm} />} />
+            <Route path="/problems" render={(props) => <Problems {...props} tm={this.tm} />} />
             <Route path="/results" render={(props) => <Results {...props} tm={this.tm} />} />
             <Route path="/teamresults" render={(props) => <TeamResults {...props} tm={this.tm} />} />
+            <Route path="/leaderboard" render={(props) => <Leaderboard {...props} tm={this.tm} />} />
             <Route path="/profile" render={(props) => <Profile {...props} tm={this.tm} />} />
             <Route path="/login" render={(props) => <Login {...props} tm={this.tm} />} />
             <Route

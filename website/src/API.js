@@ -437,6 +437,32 @@ class API {
       );
     });
   }
+
+  static genTeamCode() {
+    return new Promise((resolve, reject) => {
+      fetch("/api/genTeamCode", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then(
+        (resp) => {
+          if (resp.status === 200) {
+            // success
+            ToastsStore.success("Created Team: " + resp.team);
+          } else {
+            resp.json().then((resp) => {
+              ToastsStore.error(resp.message, 10000);
+              resolve(false);
+            });
+          }
+        },
+        (err) => {
+          console.log(err);
+        }
+      );
+    });
+  }
 }
 
 export default API;

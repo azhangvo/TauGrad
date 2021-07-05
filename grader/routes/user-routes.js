@@ -216,7 +216,7 @@ async function routes(fastify, options) {
                     reply.code(400).send(new Error("You're already in that team!"));
                     return;
                 }
-                let prevTeam = cTeams.findOne({id: data.team});
+                let prevTeam = await cTeams.findOne({id: data.team});
                 let members = prevTeam.members;
                 members = members.filter((value, index, arr) => {
                     return value !== req.user.id;
@@ -237,6 +237,63 @@ async function routes(fastify, options) {
 
             reply.send({success: true, team: team.teamname});
         }
+    );
+
+    fastify.post(
+      "/genTeamCode",
+      {preValidation: [fastify.authenticate]},
+      async(req, reply) => {
+
+        // generate new team code
+        let newCode =
+            Math.random().toString(36).substring(2, 15) +
+            Math.random().toString(36).substring(2, 15);
+
+        while (await cTeams.findOne({code:newCode})) {
+            newCode =
+                Math.random().toString(36).substring(2, 15) +
+                Math.random().toString(36).substring(2, 15);
+        }
+
+        // delete from prevTeam
+
+        let data = await c.findOne({id: req.user.id});
+
+        if(data.team){
+          let prevTeam = await cTeams.findOne({id: data.team});
+          let members = prevTeam.members;
+          members = members.filter((value, index, arr) => {
+              return value !== req.user.id;
+          });
+          await cTeams.updateOne(prevTeam, {$set: {members}});
+        }
+
+        // save newCode to indiv
+
+        let metadata = await cTeams.findOne({specificUse: "databaseInfo"});
+        let teamId = metadata.teamId + 1;
+
+        await c.updateOne(
+            data,
+            {$set: {team: teamId,
+                    teamname: ""}}
+        );
+
+        // save newCode to teams
+
+        let newMems = [req.user.id];
+        await cTeams.insertOne(
+          {id: teamId,
+          members: newMems,
+          teamname: "",
+          code: newCode
+          });
+
+        await cTeams.updateOne({specificUse: "databaseInfo"}, {$set: {teamId: teamId}});
+
+        reply.send({success: true, team: newCode});
+        return;
+      }
     );
 
     fastify.post(

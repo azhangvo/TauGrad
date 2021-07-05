@@ -111,6 +111,20 @@ class Profile extends Component {
       ToastsStore.error("You have made no changes");
     }
   }
+  genTeamCode(){
+      ToastsStore.success("YO");
+
+      API.genTeamCode().then(() => {
+        ToastsStore.success("Successfully generated a new team code!");
+        // API.retrieveInfo().then(() => {
+        //   document.getElementsByName("username")[0].value = "";
+        //   document.getElementsByName("currentPassword")[0].value = "";
+        //   document.getElementsByName("team")[0].value = "";
+        //   this.checkChanged();
+        //   this.forceUpdate();
+        // });
+      });
+  }
   render() {
     if (API.getLoginStatus() && API.info.user) {
       return (
@@ -147,6 +161,9 @@ class Profile extends Component {
               name="team"
               onChange={this.checkChanged}
             />
+          <button type="submit" onClick={this.genTeamCode}>
+              Generate New Team Code
+            </button>
             <button type="submit" onClick={this.save}>
               Save
             </button>

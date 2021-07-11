@@ -9,10 +9,11 @@ class Profile extends Component {
   constructor(props) {
     super(props);
     API.waitUpdate(this);
-    this.state = { logoutAll: false, dataset: null, changed: false };
+    this.state = { logoutAll: false, dataset: null, changed: false, confirm: false };
     this.datasetOptions = [];
     this.checkChanged = this.checkChanged.bind(this);
     this.save = this.save.bind(this);
+    this.genTeamCode = this.genTeamCode.bind(this);
   }
   componentDidMount() {
     this.resizeProfileIcon();
@@ -112,17 +113,16 @@ class Profile extends Component {
     }
   }
   genTeamCode(){
-      ToastsStore.success("YO");
+      let teamname = document.getElementsByName("teamname")[0].value;
 
-      API.genTeamCode().then(() => {
-        ToastsStore.success("Successfully generated a new team code!");
-        // API.retrieveInfo().then(() => {
-        //   document.getElementsByName("username")[0].value = "";
-        //   document.getElementsByName("currentPassword")[0].value = "";
-        //   document.getElementsByName("team")[0].value = "";
-        //   this.checkChanged();
-        //   this.forceUpdate();
-        // });
+      API.genTeamCode(teamname).then((success) => {
+        if(success) {
+          ToastsStore.success("Successfully generated a new team code!");
+          API.retrieveInfo().then(() => {
+            document.getElementsByName("teamname")[0].value = "";
+            this.forceUpdate();
+          });
+        }
       });
   }
   render() {
@@ -134,7 +134,7 @@ class Profile extends Component {
               id="profilePicture"
               src={API.info["profile"]}
               alt="Profile"
-            ></img>
+            />
             <h1 id="title">Profile</h1>
             <label id="username">Username</label>
             <input
@@ -161,9 +161,20 @@ class Profile extends Component {
               name="team"
               onChange={this.checkChanged}
             />
-          <button type="submit" onClick={this.genTeamCode}>
-              Generate New Team Code
-            </button>
+            <hr/>
+            <br/>
+            <label><b>Create a New Team</b></label>
+            <div className={styles.teamcontainer}>
+                <input
+                  type="text"
+                  placeholder="Team Name"
+                  name={"teamname"}
+                />
+                <button type="submit" onClick={() => this.setState({confirm: true})}>
+                    Create Team
+                </button>
+            </div>
+            <hr/>
             <button type="submit" onClick={this.save}>
               Save
             </button>
@@ -192,6 +203,17 @@ class Profile extends Component {
             >
               Logout
             </button>
+          </div>
+          <div className={styles.confirm} style={{display: this.state.confirm ? "flex" : "none"}} onClick={() => this.setState({confirm: false})}>
+            <div>
+              <label>
+                Are you sure you want to create a new team?
+              </label>
+              <div style={{display: "flex"}}>
+                <button type={"submit"} onClick={this.genTeamCode}>Yes</button>
+                <button type={"submit"} onClick={() => this.setState({confirm: false})}>No</button>
+              </div>
+            </div>
           </div>
         </div>
       );

@@ -170,12 +170,16 @@ async function routes(fastify, options) {
             if (data.teamname) {
                 team = data.teamname;
                 let teamData = await cTeams.findOne({id: data.team});
-                if (Date.now() >= 1595160000000) {
-                    // 1095160000000
-                    start = teamData.start;
-                    ended = Date.now() - teamData.start > 10800000;
+                if(teamData) {
+                    if (Date.now() >= 1628251200) {
+                        // 1095160000000
+                        start = teamData.start;
+                        ended = Date.now() - teamData.start > 10800000;
+                    }
+                    teamcode = teamData.code;
+                } else {
+                    team = "N/A - Create a new one"
                 }
-                teamcode = teamData.code;
             }
             reply.send({
                 user: req.user,
@@ -243,6 +247,24 @@ async function routes(fastify, options) {
       "/genTeamCode",
       {preValidation: [fastify.authenticate]},
       async(req, reply) => {
+        let params = req.body;
+        if (!params) {
+          reply.code(400).send(new Error("Missing body"));
+          return;
+        }
+
+        console.log(params)
+        console.log(typeof params)
+        if (!params.teamname) {
+          reply.code(400).send(new Error("Missing team name"));
+          return;
+        }
+
+        let existingTeams = await cTeams.find({teamname: params.teamname}).toArray();
+        if(existingTeams.length > 0) {
+            reply.code(409).send(new Error("Team with that name already exists"));
+            return;
+        }
 
         // generate new team code
         let newCode =
@@ -259,13 +281,15 @@ async function routes(fastify, options) {
 
         let data = await c.findOne({id: req.user.id});
 
-        if(data.team){
+        if(data.team) {
           let prevTeam = await cTeams.findOne({id: data.team});
-          let members = prevTeam.members;
-          members = members.filter((value, index, arr) => {
-              return value !== req.user.id;
-          });
-          await cTeams.updateOne(prevTeam, {$set: {members}});
+          if(prevTeam) {
+              let members = prevTeam.members;
+              members = members.filter((value, index, arr) => {
+                  return value !== req.user.id;
+              });
+              await cTeams.updateOne(prevTeam, {$set: {members}});
+          }
         }
 
         // save newCode to indiv
@@ -276,7 +300,7 @@ async function routes(fastify, options) {
         await c.updateOne(
             data,
             {$set: {team: teamId,
-                    teamname: ""}}
+                    teamname: params.teamname}}
         );
 
         // save newCode to teams
@@ -285,14 +309,13 @@ async function routes(fastify, options) {
         await cTeams.insertOne(
           {id: teamId,
           members: newMems,
-          teamname: "",
+          teamname: params.teamname,
           code: newCode
           });
 
         await cTeams.updateOne({specificUse: "databaseInfo"}, {$set: {teamId: teamId}});
 
         reply.send({success: true, team: newCode});
-        return;
       }
     );
 

@@ -438,18 +438,25 @@ class API {
     });
   }
 
-  static genTeamCode() {
+  static genTeamCode(teamname) {
     return new Promise((resolve, reject) => {
       fetch("/api/genTeamCode", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          teamname: teamname
+        })
       }).then(
         (resp) => {
           if (resp.status === 200) {
             // success
-            ToastsStore.success("Created Team: " + resp.team);
+            resp.json().then((resp) => {
+              ToastsStore.success("Created Team: " + resp.team);
+              resolve(true)
+            })
           } else {
             resp.json().then((resp) => {
               ToastsStore.error(resp.message, 10000);

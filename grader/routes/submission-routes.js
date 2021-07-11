@@ -127,7 +127,7 @@ async function calculateLeaderboard(cUsers, cTeams) {
         })
     }
 
-    setInterval(calculateLeaderboard.bind(null, cUsers, cTeams), 30000);
+    setTimeout(calculateLeaderboard.bind(null, cUsers, cTeams), 30000);
 }
 
 loadProblemInfo();
@@ -788,6 +788,11 @@ async function routes(fastify, options) {
             }
 
             let teamData = await cTeams.findOne({id: cu.team});
+            if(!teamData) {
+                reply.code(400).send(new Error("Your team does not exist. Create a new one!"));
+                return;
+            }
+
             if (!teamData.start) {
                 reply.code(400).send(new Error("Time has not started yet"));
                 return;

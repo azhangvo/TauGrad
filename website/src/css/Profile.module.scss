@@ -14,12 +14,39 @@
   .infoContainer {
     margin: 20px;
     @include for-tablet-portrait-up {
-      margin: auto;
+      margin: 60px;
     }
+
+    .teamcontainer {
+      display: flex;
+      :first-child {
+        flex-shrink: 1;
+      }
+      :nth-child(2) {
+        flex-shrink: 3;
+        min-width: 200px;
+      }
+    }
+
     .unsavedChanges {
       color: red;
     }
   }
+
+  .confirm {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+
+    z-index: 10;
+    justify-content: center;
+    align-items: center;
+
+    background: rgba(255, 255, 255, 0.6);
+  }
+
   div {
     img {
       float: right;

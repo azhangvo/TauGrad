@@ -20,7 +20,7 @@ class Results extends Component {
     API.waitUpdate(this);
   }
   render() {
-    if (!this.state.scores) {
+    if (!this.state.scores.length) {
       return <></>;
     }
     return (

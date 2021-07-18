@@ -43,7 +43,8 @@ class API {
             resp.json().then((resp) => {
               this.info = resp;
               this.started = resp.started;
-              this.ended = resp.ended;
+              this.ended = resp.ended
+              this.competitionStart = resp.competitionStart
               if (!this.info.profile)
                 this.info.profile = "/content/account_box_dark.svg";
               this.image = "/images/" + resp.image;

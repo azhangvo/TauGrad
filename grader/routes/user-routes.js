@@ -186,7 +186,7 @@ async function routes(fastify, options) {
                 profile: data.profile,
                 team: team,
                 teamcode: teamcode,
-                competitionStart: Date.now() >= 1595160000000, // 1595160000000
+                competitionStart: Date.now() >= 1628251200000, // 1595160000000
                 started: start,
                 ended: ended,
             });

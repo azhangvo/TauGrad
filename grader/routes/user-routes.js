@@ -171,7 +171,7 @@ async function routes(fastify, options) {
                 team = data.teamname;
                 let teamData = await cTeams.findOne({id: data.team});
                 if(teamData) {
-                    if (Date.now() >= 1628251200) {
+                    if (Date.now() >= 1628251200000) {
                         // 1095160000000
                         start = teamData.start;
                         ended = Date.now() - teamData.start > 10800000;

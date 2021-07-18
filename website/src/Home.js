@@ -36,10 +36,8 @@ class Home extends Component {
             <h1>Noctem Virtual</h1>
             <p>
               {" "}
-              Welcome! This website has been developed by Arthur Zhang (
-              <a href="https://www.arthurzhang.me">www.arthurzhang.me</a>{" "}
-              (website is still in progress)), and Charlotte Wang, and is
-              currently being used for <b>Noctem Virtual!</b>
+              Welcome! This website has been developed by Arthur Zhang, and Charlotte Wang, and is
+              currently being used for <b>Noctem Virtual II.</b>
             </p>
             <p>
               Please take a moment to familarize yourself with the site. You'll

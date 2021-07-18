@@ -21,7 +21,7 @@ class CompetitionNotStarted extends Component {
           </p>
           <p>
             Otherwise, just take a moment to sign up and do some testing. We
-            look forward to seeing you on <b>July 19th at 8:00AM EST (GMT-4)!</b>
+            look forward to seeing you on <b>August 6th at 8:00AM EST (GMT-4)!</b>
           </p>
         </div>
       </div>

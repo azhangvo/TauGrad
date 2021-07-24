@@ -5,15 +5,16 @@ import styles from "./css/Leaderboard.module.scss";
 class Leaderboard extends Component {
     constructor(props) {
         super(props);
-        this.state = {leaderboard: []};
+        this.state = {leaderboard: {}};
         API.getLeaderboard().then((leaderboard) => {
+            console.log(leaderboard)
             this.setState({leaderboard});
         });
         API.waitUpdate(this);
     }
 
     render() {
-        if (!this.state.leaderboard) {
+        if (!this.state.leaderboard.div1 || !this.state.leaderboard.div2) {
             return <></>;
         }
         return (
@@ -27,7 +28,7 @@ class Leaderboard extends Component {
                             <th>Time</th>
                         </tr>
                         {
-                            (this.state.leaderboard.map((team, index) => {
+                            (this.state.leaderboard.div1.map((team, index) => {
                                 return (
                                     <tr>
                                         <td>{team.name}</td>
@@ -48,7 +49,7 @@ class Leaderboard extends Component {
                             <th>Time</th>
                         </tr>
                         {
-                            (this.state.leaderboard.map((team, index) => {
+                            (this.state.leaderboard.div2.map((team, index) => {
                                 return (
                                     <tr>
                                         <td>{team.name}</td>

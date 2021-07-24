@@ -123,7 +123,8 @@ async function calculateLeaderboard(cUsers, cTeams) {
             name: t.teamname,
             score: t.totalscore,
             time: t.time,
-            hideScore: (t.hideScore ? t.hideScore : false)
+            hideScore: (t.hideScore ? t.hideScore : false),
+            division: t.division
         })
     }
 
@@ -765,15 +766,34 @@ async function routes(fastify, options) {
         "/leaderboard",
         // {preValidation: [fastify.authenticate]},
         async (req, reply) => {
-            let teams = leaderboard.slice(0, 10);
+            let div1 = [], div2 = []
+            for(let i = 0; i < leaderboard.length; i++) {
+                if(leaderboard[i].division === "div1") {
+                    if(div1.length < 10)
+                        div1.push(leaderboard[i]);
+                } else if (leaderboard[i].division === "div2") {
+                    if(div2.length < 10)
+                        div2.push(leaderboard[i])
+                }
+            }
 
-            reply.send(teams.map((team) => {
+            div1 = div1.map((team) => {
                 let {name, score, time} = team;
                 if (team.hideScore)
                     return {name}
                 else
                     return {name, score, time}
-            }))
+            })
+
+            div2 = div2.map((team) => {
+                let {name, score, time} = team;
+                if (team.hideScore)
+                    return {name}
+                else
+                    return {name, score, time}
+            })
+
+            reply.send({div1, div2})
         }
     );
 

@@ -487,28 +487,6 @@ async function routes(fastify, options) {
                 return;
             }
 
-            if (Date.now() < 1595160000000) {
-                reply.code(400).send(new Error("Competition has not started yet"));
-                return;
-            }
-
-            let cu = await cUsers.findOne({id: req.user.id});
-            if (!cu.team) {
-                reply.code(400).send(new Error("You are not in a team!"));
-                return;
-            }
-
-            let teamData = await cTeams.findOne({id: cu.team});
-            if (!teamData.start) {
-                reply.code(400).send(new Error("Time has not started yet"));
-                return;
-            }
-
-            if (Date.now() - teamData.start >= 10800000) {
-                reply.code(400).send(new Error("Your time is up!"));
-                return;
-            }
-
             if (
                 !req.body ||
                 !req.body.submission ||
@@ -574,11 +552,6 @@ async function routes(fastify, options) {
             if (!languages.includes(type)) {
                 reply.code(409).send(new Error("Language not found or supported"));
             }
-
-            await cUsers.updateOne(
-                {id: req.user.id},
-                {$set: {lastSubmission: Date.now()}}
-            );
 
             if (problemInfo[req.body.problem][req.user.id]) {
                 fs.unlink(
@@ -666,14 +639,6 @@ async function routes(fastify, options) {
 
             await compile(files, req.body.problem, status);
 
-            // if (status[0][0] === 4) {
-            //   for (let i = 0; i < files.length; i++) {
-            //     for (let j = 0; j < 10; j++) {
-            //       results[i][j] = false;
-            //       status[i][j + 1] = 5;
-            //     }
-            //   }
-            // } else {
             for (let i = 1; i <= 10; i++) {
                 if (!fs.existsSync("./tests/" + req.body.problem + "/test" + i + ".in"))
                     continue;
@@ -692,19 +657,6 @@ async function routes(fastify, options) {
                 total: total[0],
                 results: results[0],
             });
-
-            await cUsers.updateOne(
-                {id: req.user.id},
-                {
-                    $set: {
-                        [req.body.problem]: {
-                            status: status[0],
-                            total: total[0],
-                            results: results[0],
-                        },
-                    },
-                }
-            );
         }
     );
 
@@ -802,26 +754,6 @@ async function routes(fastify, options) {
         {preValidation: [fastify.authenticate]},
         async (req, reply) => {
             let cu = await cUsers.findOne({id: req.user.id});
-            if (!cu.team) {
-                reply.code(400).send(new Error("You are not in a team!"));
-                return;
-            }
-
-            let teamData = await cTeams.findOne({id: cu.team});
-            if(!teamData) {
-                reply.code(400).send(new Error("Your team does not exist. Create a new one!"));
-                return;
-            }
-
-            if (!teamData.start) {
-                reply.code(400).send(new Error("Time has not started yet"));
-                return;
-            }
-
-            if (Date.now() - teamData.start >= 10800000) {
-                reply.code(400).send(new Error("Your time is up!"));
-                return;
-            }
 
             reply.send({
                 problems: problems.slice(

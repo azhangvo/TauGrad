@@ -6,9 +6,10 @@
     height: calc(100vh - #{$navHeight});
   }
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: space-around;
+  flex-wrap: wrap;
 
   h3 {
     font-weight: normal;
@@ -17,8 +18,9 @@
   .flexCenter {
     display: flex;
     justify-content: space-around;
+    flex-direction: column;
     align-items: center;
-    width: 90vw;
+    margin: 64px;
   }
 }
 

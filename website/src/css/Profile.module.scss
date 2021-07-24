@@ -23,6 +23,36 @@
         flex-shrink: 1;
       }
       :nth-child(2) {
+        margin-left: 16px;
+        flex-shrink: 4;
+        min-width: 120px;
+        background-color: #9a9a9a;
+        &:hover {
+          filter: brightness(1.2);
+        }
+        &.active {
+          background: $dark;
+          &:hover {
+            filter: brightness(1);
+          }
+        }
+      }
+      :nth-child(3) {
+        flex-shrink: 4;
+        margin-right: 16px;
+        min-width: 120px;
+        background-color: #9a9a9a;
+        &:hover {
+          filter: brightness(1.2);
+        }
+        &.active {
+          background: $dark;
+          &:hover {
+            filter: brightness(1);
+          }
+        }
+      }
+      :nth-child(4) {
         flex-shrink: 3;
         min-width: 200px;
       }

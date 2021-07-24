@@ -118,7 +118,6 @@ async function routes(fastify, options) {
             firstlogin: user.firstlogin,
         });
         reply.send({token: token, username: user.username});
-        return;
     });
 
     fastify.post(
@@ -190,7 +189,6 @@ async function routes(fastify, options) {
                 started: start,
                 ended: ended,
             });
-            return;
         }
     );
 
@@ -253,10 +251,18 @@ async function routes(fastify, options) {
           return;
         }
 
-        console.log(params)
-        console.log(typeof params)
         if (!params.teamname) {
           reply.code(400).send(new Error("Missing team name"));
+          return;
+        }
+
+        if (!params.division) {
+          reply.code(400).send(new Error("Missing division"));
+          return;
+        }
+
+        if (params.division !== "div1" && params.division !== "div2") {
+          reply.code(400).send(new Error("Invalid division"));
           return;
         }
 
@@ -310,7 +316,8 @@ async function routes(fastify, options) {
           {id: teamId,
           members: newMems,
           teamname: params.teamname,
-          code: newCode
+          code: newCode,
+          division: params.division
           });
 
         await cTeams.updateOne({specificUse: "databaseInfo"}, {$set: {teamId: teamId}});

@@ -439,7 +439,7 @@ class API {
     });
   }
 
-  static genTeamCode(teamname) {
+  static genTeamCode(teamname, div1) {
     return new Promise((resolve, reject) => {
       fetch("/api/genTeamCode", {
         method: "POST",
@@ -448,7 +448,8 @@ class API {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          teamname: teamname
+          teamname: teamname,
+          division: div1 ? "div1" : "div2"
         })
       }).then(
         (resp) => {

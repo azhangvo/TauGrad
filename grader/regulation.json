@@ -1,4 +1,4 @@
 {
-  "problemAccess": [1, 7],
-  "problems": ["relprimes", "shadow", "nfc", "verybest", "capture", "stonks", "spring"]
+  "problemAccess": [1, 9],
+  "problems": ["duck", "distance", "whitejack", "evacuation", "windows", "wordgame", "colored", "factory", "phone"]
 }

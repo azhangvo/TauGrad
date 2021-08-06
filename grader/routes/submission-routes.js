@@ -331,8 +331,8 @@ async function run(files, status, problem, total, results, i) {
                                             testPath + "/" + problem + ".out",
                                             "utf8"
                                         );
-                                        answer = answer.replace(/^\s+|\s+$/g, "");
-                                        output = output.replace(/^\s+|\s+$/g, "");
+                                        answer = answer.replace(/^\s+|\s+$|\r/g, "");
+                                        output = output.replace(/^\s+|\s+$|\r/g, "");
                                         let diff = js_diff.diffLines(answer, output);
                                         if (diff.length === 0 || (diff.length === 1 && (diff[0].added === undefined && diff[0].removed === undefined))) {
                                             total[index]++;
@@ -375,8 +375,8 @@ async function run(files, status, problem, total, results, i) {
                                             testPath + "/" + problem + ".out",
                                             "utf8"
                                         );
-                                        answer = answer.replace(/^\s+|\s+$/g, "");
-                                        output = output.replace(/^\s+|\s+$/g, "");
+                                        answer = answer.replace(/^\s+|\s+$|\r/g, "");
+                                        output = output.replace(/^\s+|\s+$|\r/g, "");
                                         let diff = js_diff.diffLines(answer, output);
                                         if (diff.length === 0 || (diff.length === 1 && (diff[0].added === undefined && diff[0].removed === undefined))) {
                                             total[index]++;
@@ -430,8 +430,8 @@ async function run(files, status, problem, total, results, i) {
                                         testPath + "/" + problem + ".out",
                                         "utf8"
                                     );
-                                    answer = answer.replace(/^\s+|\s+$/g, "");
-                                    output = output.replace(/^\s+|\s+$/g, "");
+                                    answer = answer.replace(/^\s+|\s+$|\r/g, "");
+                                    output = output.replace(/^\s+|\s+$|\r/g, "");
                                     let diff = js_diff.diffLines(answer, output);
                                     if (diff.length === 0 || (diff.length === 1 && (diff[0].added === undefined && diff[0].removed === undefined))) {
                                         total[index]++;
@@ -473,6 +473,72 @@ async function routes(fastify, options) {
     const cTeams = db.collection("teams");
 
     calculateLeaderboard(cUsers, cTeams)
+
+
+    setInterval(async () => {
+        let teamsCursor = await cTeams.find({start: {$exists: true}});
+
+        while (await teamsCursor.hasNext()) {
+            try {
+                const teamData = await teamsCursor.next();
+
+                if (teamData.specificUse)
+                    continue;
+
+                if (!teamData.start) {
+                    // console.log(`${teamData.teamname} has not started their timer`)
+                    continue;
+                }
+
+                let members = teamData.members;
+                if (!members) {
+                    // console.log(`${teamData.teamname} doesn't have any members...`)
+                    continue;
+                }
+
+                let scores = {};
+                let toCheck = [];
+                if (teamData.division === "div1") {
+                    toCheck = problems.slice(
+                        regulations.problemAccess[0] + 2,
+                        regulations.problemAccess[1]
+                    )
+                } else {
+                    toCheck = problems.slice(
+                        regulations.problemAccess[0] - 1,
+                        regulations.problemAccess[1] - 3
+                    )
+                }
+
+                for (const problem of toCheck) {
+                    scores[problem] = 0;
+                }
+
+                await Promise.all(
+                    Object.keys(members).map(async (i) => {
+                        let member = members[i];
+                        let memberData = await cUsers.findOne({id: member});
+                        for (let i = 0; i < toCheck.length; i++) {
+                            if (toCheck[i] in memberData && memberData[toCheck[i]].status !== null && memberData[toCheck[i]].total !== null && memberData[toCheck[i]].results !== null) {
+                                scores[toCheck[i]] = Math.max(scores[toCheck[i]], memberData[toCheck[i]].total)
+                            }
+                        }
+                    })
+                );
+
+                let totalScore = 0;
+                for (const problem in scores)
+                    totalScore += scores[problem]
+
+                await cTeams.updateOne({id: teamData.id}, {$set: {teamscores: scores, totalscore: totalScore}});
+            } catch (e) {
+                console.log(e)
+            }
+        }
+    }, 30000)
+
+
+
 
     fastify.post(
         "/submit",
@@ -533,6 +599,20 @@ async function routes(fastify, options) {
                 reply.code(409).send(new Error("Problem is no longer accessible."));
                 return;
             }
+
+            let accessibleProblems = []
+            if (teamData.division === "div1") {
+                accessibleProblems = problems.slice(
+                        regulations.problemAccess[0] + 2,
+                        regulations.problemAccess[1]
+                    )
+            } else {
+                accessibleProblems = problems.slice(
+                        regulations.problemAccess[0] - 1,
+                        regulations.problemAccess[1] - 3
+                    )
+            }
+
             if (
                 regulations.problems.indexOf(req.body.problem) >
                 regulations.problemAccess[1] - 1
@@ -738,10 +818,18 @@ async function routes(fastify, options) {
             }
 
             let scores = [];
-            let toCheck = problems.slice(
-                regulations.problemAccess[0] - 1,
-                regulations.problemAccess[1]
-            );
+            let toCheck = [];
+            if (teamData.division === "div1") {
+                toCheck = problems.slice(
+                        regulations.problemAccess[0] + 2,
+                        regulations.problemAccess[1]
+                    )
+            } else {
+                toCheck = problems.slice(
+                        regulations.problemAccess[0] - 1,
+                        regulations.problemAccess[1] - 3
+                    )
+            }
             await Promise.all(
                 Object.keys(members).map(async (i) => {
                     let member = members[i];
@@ -823,12 +911,21 @@ async function routes(fastify, options) {
                 return;
             }
 
-            reply.send({
-                problems: problems.slice(
-                    regulations.problemAccess[0] - 1,
-                    regulations.problemAccess[1]
-                ),
-            });
+            if (teamData.division === "div1") {
+                reply.send({
+                    problems: problems.slice(
+                        regulations.problemAccess[0] + 2,
+                        regulations.problemAccess[1]
+                    ),
+                });
+            } else {
+                reply.send({
+                    problems: problems.slice(
+                        regulations.problemAccess[0] - 1,
+                        regulations.problemAccess[1] - 3
+                    ),
+                });
+            }
         }
     );
 
@@ -859,7 +956,11 @@ async function routes(fastify, options) {
                 return;
             }
 
-            reply.sendFile("pages/problems.html");
+            if (teamData.division === "div1") {
+                reply.sendFile("pages/problemsdiv1.html");
+            } else {
+                reply.sendFile("pages/problemsdiv2.html");
+            }
         }
     );
 }

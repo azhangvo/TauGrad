@@ -12,7 +12,11 @@ h1{
   font-weight: bold;
 }
 
-p{
+p {
+  color: white;
+}
+
+.congratsthisisaneasteregg p{
   color: white;
   text-align: center;
   /* padding: 3em; */

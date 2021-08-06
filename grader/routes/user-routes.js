@@ -336,7 +336,7 @@ async function routes(fastify, options) {
                 reply.code(400).send(new Error("You are not in a team, join one"));
             }
 
-            if (Date.now() < 1595160000000) {
+            if (Date.now() < 1628251200000) {
                 reply
                     .code(400)
                     .send(
@@ -344,9 +344,10 @@ async function routes(fastify, options) {
                             "The contest has not started yet! It starts on July 19th at 8:00AM Eastern."
                         )
                     );
+                return
             }
 
-            if (Date.now() > 1595808000000) {
+            if (Date.now() > 1628568000000) {
                 reply
                     .code(400)
                     .send(
@@ -354,6 +355,7 @@ async function routes(fastify, options) {
                             "The contest is over! You can no longer start the competition."
                         )
                     );
+                return
             }
 
             let teamData = await cTeams.findOne({id: data.team});

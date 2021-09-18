@@ -1,4 +1,4 @@
 {
   "problemAccess": [1, 9],
-  "problems": ["duck", "distance", "whitejack", "evacuation", "windows", "wordgame", "colored", "factory", "phone"]
+  "problems": ["duck", "distancing", "whitejack", "evacuation", "windows", "wordgame", "colored", "factory", "phone"]
 }

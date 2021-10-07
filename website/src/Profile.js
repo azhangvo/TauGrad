@@ -9,7 +9,7 @@ class Profile extends Component {
   constructor(props) {
     super(props);
     API.waitUpdate(this);
-    this.state = { logoutAll: false, dataset: null, changed: false, confirm: false, div1: true };
+    this.state = { logoutAll: false, dataset: null, changed: false, confirm: false };
     this.datasetOptions = [];
     this.checkChanged = this.checkChanged.bind(this);
     this.save = this.save.bind(this);
@@ -115,7 +115,7 @@ class Profile extends Component {
   genTeamCode(){
       let teamname = document.getElementsByName("teamname")[0].value;
 
-      API.genTeamCode(teamname, this.state.div1).then((success) => {
+      API.genTeamCode(teamname).then((success) => {
         if(success) {
           ToastsStore.success("Successfully generated a new team code!");
           API.retrieveInfo().then(() => {
@@ -170,12 +170,6 @@ class Profile extends Component {
                   placeholder="Team Name"
                   name={"teamname"}
                 />
-                <button type="submit" className={this.state.div1 && styles.active} onClick={() => this.setState({div1: true})}>
-                  Div 1
-                </button>
-                <button type="submit" className={!this.state.div1 && styles.active} onClick={() => this.setState({div1: false})}>
-                  Div 2
-                </button>
                 <button type="submit" onClick={() => this.setState({confirm: true})}>
                     Create Team
                 </button>

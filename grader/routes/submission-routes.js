@@ -498,17 +498,10 @@ async function routes(fastify, options) {
 
                 let scores = {};
                 let toCheck = [];
-                if (teamData.division === "div1") {
-                    toCheck = problems.slice(
-                        regulations.problemAccess[0] + 2,
-                        regulations.problemAccess[1]
-                    )
-                } else {
-                    toCheck = problems.slice(
-                        regulations.problemAccess[0] - 1,
-                        regulations.problemAccess[1] - 3
-                    )
-                }
+                toCheck = problems.slice(
+                    regulations.problemAccess[0] - 1,
+                    regulations.problemAccess[1]
+                )
 
                 for (const problem of toCheck) {
                     scores[problem] = 0;
@@ -536,8 +529,6 @@ async function routes(fastify, options) {
             }
         }
     }, 30000)
-
-
 
 
     fastify.post(
@@ -598,19 +589,6 @@ async function routes(fastify, options) {
             ) {
                 reply.code(409).send(new Error("Problem is no longer accessible."));
                 return;
-            }
-
-            let accessibleProblems = []
-            if (teamData.division === "div1") {
-                accessibleProblems = problems.slice(
-                        regulations.problemAccess[0] + 2,
-                        regulations.problemAccess[1]
-                    )
-            } else {
-                accessibleProblems = problems.slice(
-                        regulations.problemAccess[0] - 1,
-                        regulations.problemAccess[1] - 3
-                    )
             }
 
             if (
@@ -819,17 +797,10 @@ async function routes(fastify, options) {
 
             let scores = [];
             let toCheck = [];
-            if (teamData.division === "div1") {
-                toCheck = problems.slice(
-                        regulations.problemAccess[0] + 2,
-                        regulations.problemAccess[1]
-                    )
-            } else {
-                toCheck = problems.slice(
-                        regulations.problemAccess[0] - 1,
-                        regulations.problemAccess[1] - 3
-                    )
-            }
+            toCheck = problems.slice(
+                regulations.problemAccess[0] - 1,
+                regulations.problemAccess[1]
+            )
             await Promise.all(
                 Object.keys(members).map(async (i) => {
                     let member = members[i];
@@ -852,20 +823,14 @@ async function routes(fastify, options) {
 
     fastify.get(
         "/leaderboard",
-        // {preValidation: [fastify.authenticate]},
         async (req, reply) => {
-            let div1 = [], div2 = []
-            for(let i = 0; i < leaderboard.length; i++) {
-                if(leaderboard[i].division === "div1") {
-                    if(div1.length < 10)
-                        div1.push(leaderboard[i]);
-                } else if (leaderboard[i].division === "div2") {
-                    if(div2.length < 10)
-                        div2.push(leaderboard[i])
-                }
+            let leaderboard = []
+            for (let i = 0; i < leaderboard.length; i++) {
+                if (leaderboard.length < 10)
+                    leaderboard.push(leaderboard[i]);
             }
 
-            div1 = div1.map((team) => {
+            leaderboard = leaderboard.map((team) => {
                 let {name, score, time} = team;
                 if (team.hideScore)
                     return {name}
@@ -873,15 +838,7 @@ async function routes(fastify, options) {
                     return {name, score, time}
             })
 
-            div2 = div2.map((team) => {
-                let {name, score, time} = team;
-                if (team.hideScore)
-                    return {name}
-                else
-                    return {name, score, time}
-            })
-
-            reply.send({div1, div2})
+            reply.send({leaderboard})
         }
     );
 
@@ -896,7 +853,7 @@ async function routes(fastify, options) {
             }
 
             let teamData = await cTeams.findOne({id: cu.team});
-            if(!teamData) {
+            if (!teamData) {
                 reply.code(400).send(new Error("Your team does not exist. Create a new one!"));
                 return;
             }
@@ -910,22 +867,12 @@ async function routes(fastify, options) {
                 reply.code(400).send(new Error("Your time is up!"));
                 return;
             }
-
-            if (teamData.division === "div1") {
-                reply.send({
-                    problems: problems.slice(
-                        regulations.problemAccess[0] + 2,
-                        regulations.problemAccess[1]
-                    ),
-                });
-            } else {
-                reply.send({
-                    problems: problems.slice(
-                        regulations.problemAccess[0] - 1,
-                        regulations.problemAccess[1] - 3
-                    ),
-                });
-            }
+            reply.send({
+                problems: problems.slice(
+                    regulations.problemAccess[0] - 1,
+                    regulations.problemAccess[1]
+                ),
+            });
         }
     );
 
@@ -955,12 +902,7 @@ async function routes(fastify, options) {
                 reply.code(400).send(new Error("Your time is up!"));
                 return;
             }
-
-            if (teamData.division === "div1") {
-                reply.sendFile("pages/problemsdiv1.html");
-            } else {
-                reply.sendFile("pages/problemsdiv2.html");
-            }
+            reply.sendFile("pages/problems.html");
         }
     );
 }
